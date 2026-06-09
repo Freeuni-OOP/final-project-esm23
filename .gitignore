@@ -1,0 +1,17 @@
+# build
+target/
+*.class
+
+# intellij
+.idea/
+*.iml
+
+# logs
+*.log
+
+# creds
+db.properties
+
+# os
+.DS_Store
+Thumbs.db
