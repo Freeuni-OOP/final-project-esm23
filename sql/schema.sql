@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS quizes;
+DROP TABLE IF EXISTS questions;
 
 CREATE TABLE users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -32,3 +33,11 @@ CREATE TABLE questions (
     position INT NOT NULL DEFAULT 0, -- display order when random_order (in quizzes table) is off
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
+-- TODO:
+-- question options
+-- quiz attempts
+-- attempt answers
+-- friends
+-- messages
+-- announcements/feed
+-- achievements
