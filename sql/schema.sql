@@ -1,7 +1,7 @@
 -- Quiz Website Schema (MySQL)
 
 DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS quizes;
+DROP TABLE IF EXISTS quizzes;
 DROP TABLE IF EXISTS questions;
 DROP TABLE IF EXISTS answers;
 DROP TABLE IF EXISTS questions;
