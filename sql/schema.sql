@@ -1,7 +1,18 @@
+-- Quiz Website Schema (MySQL)
+
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS quizes;
 DROP TABLE IF EXISTS questions;
 DROP TABLE IF EXISTS answers;
+DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS question_options;
+DROP TABLE IF EXISTS quiz_attempts;
+DROP TABLE IF EXISTS attempt_answers;
+DROP TABLE IF EXISTS friendships;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS announcements;
+DROP TABLE IF EXISTS achievements;
+DROP TABLE IF EXISTS user_achievements;
 
 CREATE TABLE users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
