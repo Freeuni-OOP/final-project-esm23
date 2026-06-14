@@ -95,6 +95,9 @@ CREATE TABLE messages (
     quiz_id BIGINT,
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE SET NULL -- keep the message if the quiz is deleted
 );
 
 -- TODO:
