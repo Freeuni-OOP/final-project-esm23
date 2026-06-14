@@ -12,6 +12,9 @@ CREATE TABLE users (
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+
+-- Quiz interface
+
 CREATE TABLE quizzes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     creator_id BIGINT NOT NULL,
@@ -76,6 +79,8 @@ CREATE TABLE attempt_answers (
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
+-- Friends and messages
+
 CREATE TABLE friendships (
     user_id BIGINT NOT NULL, -- the person who sent the request
     friend_id BIGINT NOT NULL, -- the person receiving it
@@ -100,8 +105,19 @@ CREATE TABLE messages (
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE SET NULL -- keep the message if the quiz is deleted
 );
 
--- TODO:
+-- Admin Panel
 
--- messages
--- announcements/feed
--- achievements
+CREATE TABLE announcements (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    admin_id BIGINT NOT NULL,
+    body TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE achievements (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(80) NOT NULL UNIQUE,
+    description VARCHAR(255) NOT NULL,
+    icon VARCHAR(255)
+);
