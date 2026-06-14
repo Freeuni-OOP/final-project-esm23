@@ -76,11 +76,29 @@ CREATE TABLE attempt_answers (
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
+CREATE TABLE friendships (
+    user_id BIGINT NOT NULL, -- the person who sent the request
+    friend_id BIGINT NOT NULL, -- the person receiving it
+    status ENUM('PENDING','ACCEPTED') NOT NULL DEFAULT 'PENDING', -- pending until confirmed
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, friend_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    sender_id BIGINT NOT NULL,
+    recipient_id BIGINT NOT NULL,
+    message_type ENUM('FRIEND_REQUEST','CHALLENGE','NOTE') NOT NULL,
+    body TEXT,
+    quiz_id BIGINT,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+);
+
 -- TODO:
 
--- quiz attempts
--- attempt answers
--- friends
 -- messages
 -- announcements/feed
 -- achievements
