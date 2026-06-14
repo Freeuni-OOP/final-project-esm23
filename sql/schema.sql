@@ -22,3 +22,13 @@ CREATE TABLE quizzes (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE questions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    quiz_id BIGINT NOT NULL,
+    question_type ENUM('QUESTION_RESPONSE', 'FILL_BLANK', 'MULTIPLE_CHOICE', 'PICTURE_RESPONSE') NOT NULL,
+    question_text TEXT NOT NULL,
+    image_url VARCHAR(500),
+    position INT NOT NULL DEFAULT 0, -- display order when random_order (in quizzes table) is off
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
