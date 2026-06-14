@@ -121,3 +121,13 @@ CREATE TABLE achievements (
     description VARCHAR(255) NOT NULL,
     icon VARCHAR(255)
 );
+
+-- join table: which user earned which achievement and when
+CREATE TABLE user_achievements (
+    user_id BIGINT NOT NULL,
+    achievement_id BIGINT NOT NULL,
+    earned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, achievement_id), -- achievements earned only ONCE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (achievement_id) REFERENCES achievements(id) ON DELETE CASCADE
+);
