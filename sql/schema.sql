@@ -1,4 +1,7 @@
 -- Quiz Website Schema (MySQL)
+CREATE DATABASE IF NOT EXISTS quiz_db CHARACTER SET utf8mb4;
+
+USE quiz_db;
 
 DROP TABLE IF EXISTS user_achievements, achievements, announcements,
     messages, friendships, attempt_answers, quiz_attempts,
