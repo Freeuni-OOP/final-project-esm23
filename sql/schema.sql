@@ -35,6 +35,16 @@ CREATE TABLE questions (
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
 
+-- Multiple Choice Question Options
+-- (as a separate table because the number of possible answers in not defined)
+CREATE TABLE question_options (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    question_id BIGINT NOT NULL,
+    option_text VARCHAR(255) NOT NULL,
+    is_correct BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+);
+
 CREATE TABLE answers (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     question_id BIGINT NOT NULL,
@@ -42,6 +52,7 @@ CREATE TABLE answers (
     slot_index INT, -- null for normal questions, set for ordered multi answer
     FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
+
 
 -- TODO:
 
