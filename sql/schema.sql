@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS quizes;
 DROP TABLE IF EXISTS questions;
+DROP TABLE IF EXISTS answers;
 
 CREATE TABLE users (
     id            BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -33,8 +34,17 @@ CREATE TABLE questions (
     position INT NOT NULL DEFAULT 0, -- display order when random_order (in quizzes table) is off
     FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
 );
+
+CREATE TABLE answers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    question_id BIGINT NOT NULL,
+    answer_text VARCHAR(255) NOT NULL,
+    slot_index INT, -- null for normal questions, set for ordered multi answer
+    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+);
+
 -- TODO:
--- question options
+
 -- quiz attempts
 -- attempt answers
 -- friends
