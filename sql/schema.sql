@@ -1,8 +1,4 @@
 -- Quiz Website Schema (MySQL)
-
--- Run against dev DB:  mysql -u quizapp -p quiz_db    < sql/schema.sql
--- Run against test DB: mysql -u quizapp -p quizdb_test < sql/schema.sql
-
 CREATE DATABASE IF NOT EXISTS quiz_db CHARACTER SET utf8mb4;
 
 USE quiz_db;
