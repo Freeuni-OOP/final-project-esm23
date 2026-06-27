@@ -208,6 +208,31 @@ public class QuizDAOTest {
 		}
 	}
 
+
+	@Test
+	public void testUpdate() throws SQLException {
+		long id = dao.insert(sampleQuiz("Old Title"));
+		Quiz q = dao.findById(id);
+
+		// flip every field to catch a column-order typo in the sql
+		q.setTitle("New Title");
+		q.setDescription("New desc");
+		q.setRandomOrder(true);
+		q.setOnePage(false);
+		q.setImmediateCorrection(true);
+		q.setPracticeEnabled(true);
+		dao.update(q);
+
+		Quiz updated = dao.findById(id);
+		assertEquals("New Title", updated.getTitle());
+		assertEquals("New desc", updated.getDescription());
+		assertTrue(updated.isRandomOrder());
+		assertFalse(updated.isOnePage());
+		assertTrue(updated.isImmediateCorrection());
+		assertTrue(updated.isPracticeEnabled());
+	}
+
+
 	// push a quiz's created_at one hour into the past so ordering tests are deterministic
 	private void backdate(long quizId) throws SQLException {
 		String sql = "UPDATE quizzes SET created_at = DATE_SUB(NOW(), INTERVAL 1 HOUR) WHERE id = ?";
