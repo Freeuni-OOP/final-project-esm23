@@ -10,8 +10,8 @@ import java.util.List;
 public class AnswerDAO {
 
 	private Answer mapRow(ResultSet rs) throws SQLException {
-		int slot = rs.getInt("slot");
-		Integer slotIndex = rs.wasNull() ? null : rs.getInt("slot_index");
+		int slot = rs.getInt("slot_index");
+		Integer slotIndex = rs.wasNull() ? null : slot;
 		return new Answer(
 						rs.getLong("id"),
 						rs.getLong("question_id"),
