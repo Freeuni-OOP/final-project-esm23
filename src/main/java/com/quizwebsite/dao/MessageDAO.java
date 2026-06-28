@@ -45,7 +45,8 @@ public class MessageDAO {
 
 	// inbox: all messages for a user, newest first
 	public List<Message> findByRecipient(long recipientId) throws SQLException {
-		String sql = "SELECT * FROM messages WHERE recipient_id = ? ORDER BY sent_at DESC";
+		String sql = "SELECT * FROM messages WHERE recipient_id = ? ORDER BY sent_at DESC, id DESC";
+		// tiebreak on ID
 		try (Connection conn = DBConnection.get();
 				 PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setLong(1, recipientId);
