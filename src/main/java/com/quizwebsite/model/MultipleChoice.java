@@ -13,12 +13,14 @@ public class MultipleChoice extends Question {
 	public void setOptions(List<QuestionOption> options) { this.options = options; }
 
 	@Override
-	public boolean checkAnswer(String userInput, List<Answer> correctAnswers) {
-		for (QuestionOption option : options) {
-			if (option.isCorrect() && option.getOptionText().equalsIgnoreCase(userInput.trim())) {
-				return true;
-			}
+	public int grade(List<String> responses, List<Answer> correctAnswers) {
+		if (responses == null || responses.isEmpty()) return 0;
+		String input = responses.get(0).trim();
+		for (QuestionOption opt : options) {
+			if (opt.isCorrect() && opt.getOptionText().equalsIgnoreCase(input)) return 1;
 		}
-		return false;
+		return 0;
 	}
+	@Override
+	public int maxPoints(List<Answer> correctAnswers) { return 1; }
 }

@@ -36,10 +36,10 @@ public class MultipleChoiceTest {
 	}
 
 	@Test
-	public void testCheckAnswer() {
-		assertTrue(q.checkAnswer("Lewis Hamilton", null));
-		assertTrue(q.checkAnswer("lewis hamilton", null));
-		assertTrue(q.checkAnswer("  Lewis Hamilton  ", null));
-		assertFalse(q.checkAnswer("Max Verstappen", null));
+	public void testGrade() {
+		assertEquals(1, q.grade(List.of("Lewis Hamilton"), null));
+		assertEquals(1, q.grade(List.of("lewis hamilton"), null));
+		assertEquals(1, q.grade(List.of("  Lewis Hamilton  "), null));
+		assertEquals(0, q.grade(List.of("Max Verstappen"), null));
 	}
 }

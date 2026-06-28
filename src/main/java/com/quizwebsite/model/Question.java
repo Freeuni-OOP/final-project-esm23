@@ -19,7 +19,8 @@ public abstract class Question {
 		this.position = position;
 	}
 
-	public abstract boolean checkAnswer(String userInput, List<Answer> correctAnswers);
+	public abstract int grade(List<String> responses, List<Answer> correctAnswers);
+	public abstract int maxPoints(List<Answer> correctAnswers); // how much each question is worth
 
 	public long getId() { return id; }
 	public long getQuizId() { return quizId; }
