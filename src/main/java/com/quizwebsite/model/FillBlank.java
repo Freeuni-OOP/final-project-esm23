@@ -9,12 +9,14 @@ public class FillBlank extends Question {
 	}
 
 	@Override
-	public boolean checkAnswer(String userInput, List<Answer> correctAnswers) {
-		for (Answer answer : correctAnswers) {
-			if (answer.getAnswerText().equalsIgnoreCase(userInput.trim())) {
-				return true;
-			}
+	public int grade(List<String> responses, List<Answer> correctAnswers) {
+		if (responses == null || responses.isEmpty()) return 0;
+		String input = responses.get(0).trim();
+		for (Answer a : correctAnswers) {
+			if (a.getAnswerText().equalsIgnoreCase(input)) return 1;
 		}
-		return false;
+		return 0;
 	}
+	@Override
+	public int maxPoints(List<Answer> correctAnswers) { return 1; }
 }
