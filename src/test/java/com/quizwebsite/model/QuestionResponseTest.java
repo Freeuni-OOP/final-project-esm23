@@ -35,10 +35,10 @@ public class QuestionResponseTest {
 	}
 
 	@Test
-	public void testCheckAnswer() {
-		assertTrue(q.checkAnswer("Gamsakhurdia", answers));
-		assertTrue(q.checkAnswer("gamsakhurdia", answers));
-		assertTrue(q.checkAnswer("Zviad Gamsakhurdia", answers));
-		assertFalse(q.checkAnswer("Eduard Shevardnadze", answers));
+	public void testGrade() {
+		assertEquals(1, q.grade(List.of("Gamsakhurdia"), answers));
+		assertEquals(1, q.grade(List.of("gamsakhurdia"), answers));
+		assertEquals(1, q.grade(List.of("Zviad Gamsakhurdia"), answers));
+		assertEquals(0, q.grade(List.of("Eduard Shevardnadze"), answers));
 	}
 }

@@ -2,9 +2,7 @@ package com.quizwebsite.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PictureResponseTest {
@@ -27,38 +25,38 @@ public class PictureResponseTest {
 	}
 
 	@Test
-	void correctAnswerExactMatch() {
-		assertTrue(question.checkAnswer("messi", answers));
+	void exactMatch() {
+		assertEquals(1, question.grade(List.of("messi"), answers));
 	}
 
 	@Test
-	void correctAnswerCaseInsensitive() {
-		assertTrue(question.checkAnswer("MESSI", answers));
+	void caseInsensitive() {
+		assertEquals(1, question.grade(List.of("MESSI"), answers));
 	}
 
 	@Test
-	void correctAnswerTrimsWhitespace() {
-		assertTrue(question.checkAnswer("  messi  ", answers));
+	void trimsWhitespace() {
+		assertEquals(1, question.grade(List.of("  messi  "), answers));
 	}
 
 	@Test
-	void secondAcceptedAnswerWorks() {
-		assertTrue(question.checkAnswer("Lionel Messi", answers));
+	void secondAcceptedAnswer() {
+		assertEquals(1, question.grade(List.of("Lionel Messi"), answers));
 	}
 
 	@Test
-	void wrongAnswerReturnsFalse() {
-		assertFalse(question.checkAnswer("Ronaldo", answers));
+	void wrongAnswer() {
+		assertEquals(0, question.grade(List.of("Ronaldo"), answers));
 	}
 
 	@Test
-	void nullAnswerListReturnsFalse() {
-		assertFalse(question.checkAnswer("Messi", null));
+	void nullAnswerList() {
+		assertEquals(0, question.grade(List.of("Messi"), null));
 	}
 
 	@Test
-	void nullInputReturnsFalse() {
-		assertFalse(question.checkAnswer(null, answers));
+	void emptyResponses() {
+		assertEquals(0, question.grade(List.of(), answers));
 	}
 
 	@Test
