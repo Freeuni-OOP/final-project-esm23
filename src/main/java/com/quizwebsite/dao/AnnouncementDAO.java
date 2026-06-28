@@ -23,7 +23,7 @@ public class AnnouncementDAO {
 
 	// homepage shows latest announcements first
 	public List<Announcement> findAll() throws SQLException {
-		String sql = "SELECT * FROM announcements ORDER BY created_at DESC";
+		String sql = "SELECT * FROM announcements ORDER BY created_at DESC, id DESC";
 		try (Connection conn = DBConnection.get();
 				 PreparedStatement ps = conn.prepareStatement(sql);
 				 ResultSet rs = ps.executeQuery()) {
