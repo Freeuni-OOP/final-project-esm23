@@ -1,7 +1,6 @@
 package com.quizwebsite.dao;
 
 import com.quizwebsite.model.*;
-import com.quizwebsite.util.DBConnection;
 import org.junit.jupiter.api.*;
 
 import java.sql.*;
@@ -83,5 +82,67 @@ public class QuestionDAOTest {
 		assertEquals("First", questions.get(0).getQuestionText());
 		assertEquals("Second", questions.get(1).getQuestionText());
 		assertEquals("Third", questions.get(2).getQuestionText());
+	}
+
+	// insert
+	@Test
+	void testInsertQuestionResponse() throws SQLException {
+		Question q = new QuestionResponse(0, quizId, "Who was the first F1 champion?", 0);
+		long id = dao.insert(q);
+		assertTrue(id > 0);
+
+		Question found = dao.findById(id);
+		assertEquals(QuestionType.QUESTION_RESPONSE, found.getType());
+		assertNull(found.getImageUrl());
+	}
+
+	@Test
+	void testInsertFillBlank() throws SQLException {
+		Question q = new FillBlank(0, quizId, "Ferrari was founded in ________.", 0);
+		long id = dao.insert(q);
+		Question found = dao.findById(id);
+		assertEquals(QuestionType.FILL_BLANK, found.getType());
+	}
+
+	@Test
+	void testInsertMultipleChoice() throws SQLException {
+		Question q = new MultipleChoice(0, quizId, "Who won Euro 2020?", 0);
+		long id = dao.insert(q);
+		Question found = dao.findById(id);
+		assertEquals(QuestionType.MULTIPLE_CHOICE, found.getType());
+	}
+
+	@Test
+	void testInsertPictureResponsePreservesImageUrl() throws SQLException {
+		Question q = new PictureResponse(0, quizId, "Which club badge is this?", "https://example.com/badge.png", 0);
+		long id = dao.insert(q);
+		Question found = dao.findById(id);
+		assertEquals(QuestionType.PICTURE_RESPONSE, found.getType());
+		assertEquals("https://example.com/badge.png", found.getImageUrl());
+	}
+
+	@Test
+	void testInsertAssignsUniqueIds() throws SQLException {
+		long id1 = dao.insert(new QuestionResponse(0, quizId, "Q1", 0));
+		long id2 = dao.insert(new QuestionResponse(0, quizId, "Q2", 1));
+		assertNotEquals(id1, id2);
+	}
+
+	// delete
+
+	@Test
+	void testDeleteRemovesQuestion() throws SQLException {
+		long id = dao.insert(new QuestionResponse(0, quizId, "temp question", 0));
+		dao.delete(id);
+		assertNull(dao.findById(id));
+	}
+
+	@Test
+	void testDeleteOnlyRemovesTargetRow() throws SQLException {
+		long id1 = dao.insert(new QuestionResponse(0, quizId, "Q1", 0));
+		long id2 = dao.insert(new QuestionResponse(0, quizId, "Q2", 1));
+		dao.delete(id1);
+		assertNull(dao.findById(id1));
+		assertNotNull(dao.findById(id2)); // second row must survive
 	}
 }
