@@ -45,4 +45,34 @@ public class QuestionDAO {
 			}
 		}
 	}
+
+	// returns the generated question id
+	public long insert(Question question) throws SQLException {
+		String sql = """
+            INSERT INTO questions (quiz_id, question_type, question_text, image_url, position)
+            VALUES (?, ?, ?, ?, ?)
+            """;
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			ps.setLong(1, question.getQuizId());
+			ps.setString(2, question.getType().name());
+			ps.setString(3, question.getQuestionText());
+			ps.setString(4, question.getImageUrl()); // column allows NULL
+			ps.setInt(5, question.getPosition());
+			ps.executeUpdate();
+			try (ResultSet keys = ps.getGeneratedKeys()) {
+				keys.next();
+				return keys.getLong(1);
+			}
+		}
+	}
+
+	public void delete(long questionId) throws SQLException {
+		String sql = "DELETE FROM questions WHERE id = ?";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setLong(1, questionId);
+			ps.executeUpdate();
+		}
+	}
 }
