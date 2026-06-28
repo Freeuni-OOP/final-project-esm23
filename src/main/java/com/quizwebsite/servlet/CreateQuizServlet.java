@@ -48,16 +48,14 @@ public class CreateQuizServlet extends HttpServlet {
             QuizDAO quizDAO = new QuizDAO();
 
             Quiz quiz = new Quiz(
-                    0,                    //id — DB will generate//
                     user.getId(),         //creatorId//
                     title.trim(),
                     description,
                     randomOrder,
                     onePage,
                     immediateCorrection,
-                    practiceEnabled,
-                    null                  //createdAt — DB sets this automatically//
-            );
+                    practiceEnabled
+                    );
 
             long quizId = quizDAO.insert(quiz);
 
