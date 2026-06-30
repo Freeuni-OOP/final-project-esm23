@@ -179,4 +179,95 @@ public class TakeQuizServlet extends HttpServlet {
         renderQuestionAt(request, response, quiz, order, byId, 0, null);
     }
 
+    // ---- multi-page mode ---------//
+
+
+    //advances the internal tracking pointer index by 1 and steps the view page forward//
+    @SuppressWarnings("unchecked")
+    private void advanceToNextQuestion(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+            throws SQLException, ServletException, IOException {
+
+        Long quizId = (Long) session.getAttribute(SESS_QUIZ_ID);
+        List<Long> order = (List<Long>) session.getAttribute(SESS_ORDER);
+        if (quizId == null || order == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+        Quiz quiz = quizDAO.findById(quizId);
+        int index = (Integer) session.getAttribute(SESS_INDEX) + 1;
+
+        //catches final boundaries if an application flows past the list limit//
+        if (index >= order.size()) {
+            finalizeFromSession(request, response, session, (User) session.getAttribute("user"));
+            return;
+        }
+
+        session.setAttribute(SESS_INDEX, index);
+        Map<Long, Question> byId = (Map<Long, Question>) session.getAttribute(SESS_QUESTIONS_BY_ID);
+        renderQuestionAt(request, response, quiz, order, byId, index, null);
+    }
+
+
+    //Processes the input for a single question. If Immediate Correction is checked, it computes a row-level evaluation immediately instead of proceeding//
+    @SuppressWarnings("unchecked")
+    private void submitSingleQuestion(HttpServletRequest request, HttpServletResponse response,
+                                      HttpSession session, User user, Quiz quiz) throws SQLException, ServletException, IOException {
+
+        List<Long> order = (List<Long>) session.getAttribute(SESS_ORDER);
+        Map<Long, Question> byId = (Map<Long, Question>) session.getAttribute(SESS_QUESTIONS_BY_ID);
+        Integer index = (Integer) session.getAttribute(SESS_INDEX);
+        if (order == null || byId == null || index == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        long questionId = order.get(index);
+        Question question = byId.get(questionId);
+
+        String raw = request.getParameter("response");
+        List<String> answer = (raw == null || raw.trim().isEmpty()) ? List.of() : List.of(raw.trim());
+
+        //caches current response intermediate state inside the session maps//
+        Map<Long, List<String>> responses = (Map<Long, List<String>>) session.getAttribute(SESS_RESPONSES);
+        responses.put(questionId, answer);
+
+        //grades immediately on submission and re-render current index//
+        if (quiz.isImmediateCorrection()) {
+            List<Answer> correct = answerDAO.findByQuestion(questionId);
+            int earned = question.grade(answer, correct);
+            int max = question.maxPoints(correct);
+
+            AnswerReviewRow feedback = new AnswerReviewRow(
+                    questionId, question.getQuestionText(),
+                    answer.isEmpty() ? "(skipped)" : answer.get(0),
+                    earned > 0, correctAnswerText(question, correct), earned, max);
+
+            renderQuestionAt(request, response, quiz, order, byId, index, feedback);
+            return;
+        }
+
+        //standard progression logic when Immediate Correction is turned off//
+        if (index == order.size() - 1) {
+            finalizeFromSession(request, response, session, user);
+        } else {
+            session.setAttribute(SESS_INDEX, index + 1);
+            renderQuestionAt(request, response, quiz, order, byId, index + 1, null);
+        }
+    }
+
+
+    //Central utility used to push localized request variables into the rendering template scope//
+    private void renderQuestionAt(HttpServletRequest request, HttpServletResponse response, Quiz quiz,
+                                  List<Long> order, Map<Long, Question> byId, int index, AnswerReviewRow feedback)
+            throws ServletException, IOException {
+
+        Question question = byId.get(order.get(index));
+        request.setAttribute("quiz", quiz);
+        request.setAttribute("question", question);
+        request.setAttribute("questionNumber", index + 1);
+        request.setAttribute("totalQuestions", order.size());
+        request.setAttribute("isLastQuestion", index == order.size() - 1);
+        request.setAttribute("feedback", feedback); //holds instantaneous flashcard results, if applicable//
+        request.getRequestDispatcher("takeQuizQuestion.jsp").forward(request, response);
+    }
 }
