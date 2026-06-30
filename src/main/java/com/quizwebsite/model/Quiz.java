@@ -13,6 +13,8 @@ public class Quiz {
 	private boolean practiceEnabled;
 	private final LocalDateTime createdAt;
 
+	private java.util.List<Question> questions = new java.util.ArrayList<>();
+
 	// For DB reads
 	public Quiz(long id, long creatorId, String title, String description, boolean randomOrder, boolean onePage, boolean immediateCorrection, boolean practiceEnabled, LocalDateTime createdAt) {
 		this.id = id;
@@ -28,7 +30,7 @@ public class Quiz {
 
 	// For new quiz inserts
 	public Quiz(long creatorId, String title, String description, boolean randomOrder, boolean onePage,
-							boolean immediateCorrection, boolean practiceEnabled
+				boolean immediateCorrection, boolean practiceEnabled
 	) {
 		this.id = 0;
 		this.creatorId = creatorId;
@@ -75,6 +77,14 @@ public class Quiz {
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	public java.util.List<Question> getQuestions() {
+		return questions;
+	}
+
+	public void setQuestions(java.util.List<Question> questions) {
+		this.questions = questions;
 	}
 
 	public void setTitle(String title) {
