@@ -303,4 +303,107 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
+    // ---- shared finalize / scoring --------//
+
+
+    //wrapper that retrieves data caches from the session scope to hand off to the master finish sequence//
+    @SuppressWarnings("unchecked")
+    private void finalizeFromSession(HttpServletRequest request, HttpServletResponse response,
+                                     HttpSession session, User user) throws SQLException, ServletException, IOException {
+
+        Long quizId = (Long) session.getAttribute(SESS_QUIZ_ID);
+        if (quizId == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+        Quiz quiz = quizDAO.findById(quizId);
+        Map<Long, List<String>> responses = (Map<Long, List<String>>) session.getAttribute(SESS_RESPONSES);
+        finish(request, response, session, user, quiz, responses);
+    }
+
+    //Computes total time, handles scoring metrics via execution services, gathers layout review historical DTOs, updates leaderboards, and clears state//
+    private void finish(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+                        User user, Quiz quiz, Map<Long, List<String>> responses) throws SQLException, ServletException, IOException {
+
+        Long startTime = (Long) session.getAttribute(SESS_START_TIME);
+        Boolean practice = (Boolean) session.getAttribute(SESS_PRACTICE);
+        int timeTakenSeconds = startTime == null ? 0 : (int) ((System.currentTimeMillis() - startTime) / 1000);
+        boolean isPractice = practice != null && practice;
+
+        //delegates calculations and transactional insertions down to service layers//
+        ScoringResult result = scoringService.score(user.getId(), quiz.getId(), responses, timeTakenSeconds, isPractice);
+
+        //builds un-linked presentation rows for quizResults.jsp to render historical breakdowns efficiently//
+        List<Question> questions = questionDAO.findByQuiz(quiz.getId());
+        List<AnswerReviewRow> review = new ArrayList<>();
+        for (Question q : questions) {
+            List<Answer> correct = answerDAO.findByQuestion(q.getId());
+            if (q instanceof MultipleChoice mc) {
+                mc.setOptions(optionDAO.findByQuestion(q.getId()));
+            }
+            List<String> userResp = responses.getOrDefault(q.getId(), List.of());
+            int earned = earnedFor(result.outcomes(), q.getId());
+            int max = q.maxPoints(correct);
+            review.add(new AnswerReviewRow(
+                    q.getId(), q.getQuestionText(),
+                    userResp.isEmpty() ? "(skipped)" : userResp.get(0),
+                    earned > 0, correctAnswerText(q, correct), earned, max));
+        }
+
+        //pulls current leaderboard data snippets (bypassed entirely for practice modes)//
+        List<QuizAttempt> topScores = isPractice ? List.of() : attemptDAO.findTopScores(quiz.getId(), 5);
+        Map<Long, String> topScoreNames = new LinkedHashMap<>();
+        for (QuizAttempt a : topScores) {
+            User scorer = userDAO.findById(a.getUserId());
+            topScoreNames.put(a.getId(), scorer != null ? scorer.getUsername() : "unknown");
+        }
+
+        //flushes all transactional variables out of the session block to finalize the run loop//
+        clearQuizSession(session);
+
+        request.setAttribute("quiz", quiz);
+        request.setAttribute("result", result);
+        request.setAttribute("review", review);
+        request.setAttribute("isPractice", isPractice);
+        request.setAttribute("topScores", topScores);
+        request.setAttribute("topScoreNames", topScoreNames);
+        request.getRequestDispatcher("quizResults.jsp").forward(request, response);
+    }
+
+
+    //flushes state trackers out of memory to close out the session loop safely/
+    private void clearQuizSession(HttpSession session) {
+        session.removeAttribute(SESS_QUIZ_ID);
+        session.removeAttribute(SESS_PRACTICE);
+        session.removeAttribute(SESS_START_TIME);
+        session.removeAttribute(SESS_ORDER);
+        session.removeAttribute(SESS_INDEX);
+        session.removeAttribute(SESS_RESPONSES);
+        session.removeAttribute(SESS_QUESTIONS_BY_ID);
+    }
+
+    private int earnedFor(List<QuestionOutcome> outcomes, long questionId) {
+        for (QuestionOutcome o : outcomes) {
+            if (o.questionId() == questionId) return o.earned();
+        }
+        return 0;
+    }
+
+    //generates a localized fallback string showing matching answer patterns or selection literals//
+    private String correctAnswerText(Question question, List<Answer> correct) {
+        if (question instanceof MultipleChoice mc) {
+            for (QuestionOption opt : mc.getOptions()) {
+                if (opt.isCorrect()) return opt.getOptionText();
+            }
+            return "(no correct option set)";
+        }
+        if (correct.isEmpty()) return "(no answer key set)";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < correct.size(); i++) {
+            if (i > 0) sb.append(" / ");
+            sb.append(correct.get(i).getAnswerText());
+        }
+        return sb.toString();
+    }
+
 }
