@@ -116,5 +116,67 @@ public class TakeQuizServlet extends HttpServlet {
         }
     }
 
+    // ---- starting an attempt ----------//
+
+
+     //sets up active session attributes, processes presentation options (randomization) and serves the initial workspace//
+    private void startQuiz(HttpServletRequest request, HttpServletResponse response, HttpSession session)
+            throws SQLException, ServletException, IOException {
+
+        long quizId;
+        try {
+            quizId = Long.parseLong(request.getParameter("quizId"));
+        } catch (NumberFormatException e) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        Quiz quiz = quizDAO.findById(quizId);
+        if (quiz == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        boolean practice = quiz.isPracticeEnabled() && "true".equals(request.getParameter("practice"));
+
+        List<Question> questions = questionDAO.findByQuiz(quizId);
+        if (quiz.isRandomOrder()) {
+            Collections.shuffle(questions);
+        }
+
+        //eagerly stitches layout choices onto polymorphic MultipleChoice definitions before rendering to optimize view generation//
+        for (Question q : questions) {
+            if (q instanceof MultipleChoice mc) {
+                mc.setOptions(optionDAO.findByQuestion(q.getId()));
+            }
+        }
+
+        //initializes session metrics//
+        session.setAttribute(SESS_QUIZ_ID, quizId);
+        session.setAttribute(SESS_PRACTICE, practice);
+        session.setAttribute(SESS_START_TIME, System.currentTimeMillis());
+        session.setAttribute(SESS_RESPONSES, new LinkedHashMap<Long, List<String>>());
+
+        request.setAttribute("quiz", quiz);
+
+        if (quiz.isOnePage()) {
+            request.setAttribute("questions", questions);
+            request.getRequestDispatcher("takeQuizOnePage.jsp").forward(request, response);
+            return;
+        }
+
+        //setup indexing pointers required to walk sequentially through multi-page layouts//
+        List<Long> order = new ArrayList<>();
+        Map<Long, Question> byId = new LinkedHashMap<>();
+        for (Question q : questions) {
+            order.add(q.getId());
+            byId.put(q.getId(), q);
+        }
+        session.setAttribute(SESS_ORDER, order);
+        session.setAttribute(SESS_INDEX, 0);
+        session.setAttribute(SESS_QUESTIONS_BY_ID, byId);
+
+        renderQuestionAt(request, response, quiz, order, byId, 0, null);
+    }
 
 }
