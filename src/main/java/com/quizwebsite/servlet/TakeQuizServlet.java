@@ -273,4 +273,37 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
+    // ---- one-page mode ------------//
+
+
+    //direct execution entrypoint for single-form full quiz dumps//
+    private void submitOnePage(HttpServletRequest request, HttpServletResponse response,
+                               HttpSession session, User user, Quiz quiz) throws SQLException, ServletException, IOException {
+
+        Map<Long, List<String>> responses = collectOnePageResponses(request);
+        finish(request, response, session, user, quiz, responses);
+    }
+
+
+    //scans incoming parameter keys extracting inputs prefix-mapped with 'q_'//
+    private Map<Long, List<String>> collectOnePageResponses(HttpServletRequest request) {
+        Map<Long, List<String>> responses = new LinkedHashMap<>();
+        Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            if (!name.startsWith("q_")) continue;
+            String value = request.getParameter(name);
+            if (value == null || value.trim().isEmpty()) continue;
+            try {
+                long questionId = Long.parseLong(name.substring(2));
+                responses.put(questionId, List.of(value.trim()));
+            } catch (NumberFormatException ignored) {
+                //avoids processing form control elements that are not questions//
+            }
+        }
+        return responses;
+    }
+
+
+
 }
