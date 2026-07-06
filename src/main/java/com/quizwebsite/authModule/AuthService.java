@@ -11,6 +11,7 @@ public class AuthService {
     private final PasswordHasher passwordHasher;
     // manages user sessions after successful authentication
     private final SessionManager sessionManager;
+
     // deff constructor
     public AuthService() {
         this.authRepository = new InMemoryAuthRepository();
@@ -23,6 +24,7 @@ public class AuthService {
         this.passwordHasher = new PasswordHasher();
         this.sessionManager = new SessionManager();
     }
+
     // registers new user this method also validates input if username already exists, hashes the password and save its data
     public AuthResult register(String username, String password) {
         String validationError = validateRegistrationInput(username, password);
