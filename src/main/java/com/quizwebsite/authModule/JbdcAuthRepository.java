@@ -1,6 +1,5 @@
 package com.quizwebsite.authModule;
 
-
 import com.quizwebsite.dao.UserDAO;
 import com.quizwebsite.model.User;
 
