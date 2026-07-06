@@ -9,8 +9,6 @@ public class AuthService {
     private final AuthRepository authRepository;
     // handles hashing and salting of passwords
     private final PasswordHasher passwordHasher;
-    // manages user sessions after successful authentication
-    private final SessionManager sessionManager;
 
     // deff constructor
     public AuthService() {
@@ -20,7 +18,6 @@ public class AuthService {
     public AuthService(AuthRepository authRepository) {
         this.authRepository = authRepository;
         this.passwordHasher = new PasswordHasher();
-        this.sessionManager = new SessionManager();
     }
 
     // registers new user this method also validates input if username already exists, hashes the password and save its data
@@ -42,10 +39,10 @@ public class AuthService {
         User user = new User(normalizedUsername, passwordHash, salt);
         User savedUser = authRepository.save(user);
 
-        return AuthResult.success("Registration successful.", savedUser, null);
+        return AuthResult.success("Registration successful.", savedUser);
     }
 
-    // log in an existing user the method checks the user and pass, and verifies it and after that creates session and at lat returns session token
+    // log in an existing user, checks the username and password and verifies the hash matches
     public AuthResult login(String username, String password) {
         if (username == null || username.isBlank()) {
             return AuthResult.failure("Username is required.");
@@ -68,21 +65,9 @@ public class AuthService {
         if (!passwordMatches) {
             return AuthResult.failure("Invalid username or password.");
         }
-        Session session = sessionManager.createSession(user);
-        return AuthResult.success("Login successful.", user, session.getToken());
+        return AuthResult.success("Login successful.", user);
     }
 
-    public void logout(String sessionToken) {
-        sessionManager.logout(sessionToken);
-    }
-
-    public boolean isLoggedIn(String sessionToken) {
-        return sessionManager.isLoggedIn(sessionToken);
-    }
-
-    public Optional<User> getCurrentUser(String sessionToken) {
-        return sessionManager.getSession(sessionToken).map(Session::getUser);
-    }
     // validates registration input, return error if it is invalid
     private String validateRegistrationInput(String username, String password) {
         if (username == null || username.isBlank()) {
