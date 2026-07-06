@@ -7,14 +7,14 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 // MySQL-backed AuthRepository used by AuthService in production; delegates to UserDAO.
-public class JbdcAuthRepository implements AuthRepository {
+public class JdbcAuthRepository implements AuthRepository {
 	private final UserDAO userDAO;
 
-	public JbdcAuthRepository(){
+	public JdbcAuthRepository(){
 		this(new UserDAO());
 	}
 
-	public JbdcAuthRepository(UserDAO userDAO) {
+	public JdbcAuthRepository(UserDAO userDAO) {
 		this.userDAO = userDAO;
 	}
 
