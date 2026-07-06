@@ -33,6 +33,7 @@ public class LoginServlet extends HttpServlet {
 		}
 
 		HttpSession session = request.getSession();
+		request.changeSessionId(); // drop pre-auth session id
 		session.setAttribute("user", result.getUser());
 		response.sendRedirect("index.jsp");
 	}
