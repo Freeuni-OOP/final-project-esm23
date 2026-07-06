@@ -1,6 +1,5 @@
 package com.quizwebsite.authModule;
 
-import com.quizwebsite.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,13 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test class verifies:
  * - user registration
  * - login validation
- * - logout and session handling
  * - password hashing behavior
- * - session model behavior
  */
 
- // Uses InMemoryAuthRepository so no real database is touched
- // JdbcAuthRepositoryTest for the DB-backed integration tests.
+// Uses InMemoryAuthRepository so no real database is touched
+// JdbcAuthRepositoryTest for the DB-backed integration tests.
 
 public class AuthServiceTest {
 
@@ -71,14 +68,14 @@ public class AuthServiceTest {
 
 
     @Test
-    public void loginShouldReturnSessionTokenWhenCredentialsAreCorrect() {
+    public void loginShouldSucceedWhenCredentialsAreCorrect() {
         authService.register("luka", "password123");
         AuthResult loginResult = authService.login("luka", "password123");
 
         assertTrue(loginResult.isSuccess());
         assertEquals("Login successful.", loginResult.getMessage());
-        assertNotNull(loginResult.getSessionToken());
-        assertTrue(authService.isLoggedIn(loginResult.getSessionToken()));
+        assertNotNull(loginResult.getUser());
+        assertEquals("luka", loginResult.getUser().getUsername());
     }
 
     @Test
@@ -88,7 +85,6 @@ public class AuthServiceTest {
 
         assertFalse(loginResult.isSuccess());
         assertEquals("Invalid username or password.", loginResult.getMessage());
-        assertNull(loginResult.getSessionToken());
     }
 
     @Test
@@ -97,104 +93,6 @@ public class AuthServiceTest {
 
         assertFalse(loginResult.isSuccess());
         assertEquals("Invalid username or password.", loginResult.getMessage());
-        assertNull(loginResult.getSessionToken());
-    }
-
-
-    // Session and logout tests
-
-
-    @Test
-    public void logoutShouldRemoveActiveSession() {
-        authService.register("luka", "password123");
-        AuthResult loginResult = authService.login("luka", "password123");
-
-        String token = loginResult.getSessionToken();
-
-        assertTrue(authService.isLoggedIn(token));
-
-        authService.logout(token);
-
-        assertFalse(authService.isLoggedIn(token));
-    }
-
-    @Test
-    public void getCurrentUserShouldReturnLoggedInUser() {
-        authService.register("luka", "password123");
-        AuthResult loginResult = authService.login("luka", "password123");
-
-        String token = loginResult.getSessionToken();
-
-        assertTrue(authService.getCurrentUser(token).isPresent());
-        assertEquals("luka", authService.getCurrentUser(token).get().getUsername());
-    }
-
-
-    // SessionManager tests
-
-
-    @Test
-    public void sessionShouldReturnAllSessionFields() {
-        User user = new User("luka", "hash", "salt");
-        Session session = new Session(user);
-
-        assertNotNull(session.getToken());
-        assertEquals(user, session.getUser());
-        assertNotNull(session.getCreatedAt());
-    }
-
-    @Test
-    public void sessionManagerShouldCreateAndFindSession() {
-        SessionManager sessionManager = new SessionManager();
-        User user = new User("luka", "hash", "salt");
-
-        Session session = sessionManager.createSession(user);
-
-        assertNotNull(session.getToken());
-        assertTrue(sessionManager.getSession(session.getToken()).isPresent());
-        assertEquals(user, sessionManager.getSession(session.getToken()).get().getUser());
-    }
-
-    @Test
-    public void sessionManagerShouldReturnEmptyForNullToken() {
-        SessionManager sessionManager = new SessionManager();
-
-        assertTrue(sessionManager.getSession(null).isEmpty());
-    }
-
-    @Test
-    public void sessionManagerShouldReturnEmptyForBlankToken() {
-        SessionManager sessionManager = new SessionManager();
-
-        assertTrue(sessionManager.getSession("   ").isEmpty());
-    }
-
-    @Test
-    public void sessionManagerShouldReturnEmptyForUnknownToken() {
-        SessionManager sessionManager = new SessionManager();
-
-        assertTrue(sessionManager.getSession("unknown-token").isEmpty());
-    }
-
-    @Test
-    public void sessionManagerLogoutShouldRemoveSession() {
-        SessionManager sessionManager = new SessionManager();
-        User user = new User("luka", "hash", "salt");
-
-        Session session = sessionManager.createSession(user);
-
-        assertTrue(sessionManager.isLoggedIn(session.getToken()));
-
-        sessionManager.logout(session.getToken());
-
-        assertFalse(sessionManager.isLoggedIn(session.getToken()));
-    }
-
-    @Test
-    public void sessionManagerLogoutShouldNotFailForNullToken() {
-        SessionManager sessionManager = new SessionManager();
-
-        assertDoesNotThrow(() -> sessionManager.logout(null));
     }
 
 
@@ -208,21 +106,6 @@ public class AuthServiceTest {
         assertTrue(firstResult.isSuccess());
         assertFalse(secondResult.isSuccess());
         assertEquals("Username already exists.", secondResult.getMessage());
-    }
-
-    @Test
-    public void getCurrentUserShouldReturnEmptyWhenTokenIsNull() {
-        assertTrue(authService.getCurrentUser(null).isEmpty());
-    }
-
-    @Test
-    public void getCurrentUserShouldReturnEmptyWhenTokenIsBlank() {
-        assertTrue(authService.getCurrentUser("   ").isEmpty());
-    }
-
-    @Test
-    public void getCurrentUserShouldReturnEmptyWhenTokenIsInvalid() {
-        assertTrue(authService.getCurrentUser("invalid-token").isEmpty());
     }
 
     // Password hashing tests
