@@ -24,11 +24,6 @@ public class CreateQuizServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        if (user == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
         String title       = request.getParameter("title");
         String description = request.getParameter("description");
         boolean randomOrder         = request.getParameter("randomOrder")         != null;

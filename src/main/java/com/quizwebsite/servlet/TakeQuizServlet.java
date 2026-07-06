@@ -61,10 +61,6 @@ public class TakeQuizServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
 
         String action = request.getParameter("action");
         try {
@@ -87,10 +83,6 @@ public class TakeQuizServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
-        if (user == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
 
         Long quizId = (Long) session.getAttribute(SESS_QUIZ_ID);
         if (quizId == null) {
