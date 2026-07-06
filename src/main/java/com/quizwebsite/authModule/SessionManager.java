@@ -1,5 +1,7 @@
 package com.quizwebsite.authModule;
 
+import com.quizwebsite.model.User;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -7,7 +9,7 @@ import java.util.Optional;
 public class SessionManager {
     private final Map<String, Session> sessions = new HashMap<>();
 
-    public Session createSession(AuthUser user) {
+    public Session createSession(User user) {
         Session session = new Session(user);
         sessions.put(session.getToken(), session);
         return session;

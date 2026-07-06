@@ -1,5 +1,7 @@
 package com.quizwebsite.authModule;
 
+import com.quizwebsite.model.User;
+
 import java.util.Optional;
 // handles all authentication-related operations.
 public class AuthService {
@@ -38,7 +40,7 @@ public class AuthService {
         String salt = passwordHasher.generateSalt();
         String passwordHash = passwordHasher.hashPassword(password, salt);
 
-        AuthUser user = new AuthUser(normalizedUsername, passwordHash, salt);
+        User user = new User(normalizedUsername, passwordHash, salt);
         authRepository.save(user);
 
         return AuthResult.success("Registration successful.", user, null);
@@ -54,13 +56,13 @@ public class AuthService {
         }
 
         String normalizedUsername = normalizeUsername(username);
-        Optional<AuthUser> optionalUser = authRepository.findByUsername(normalizedUsername);
+        Optional<User> optionalUser = authRepository.findByUsername(normalizedUsername);
 
         if (optionalUser.isEmpty()) {
             return AuthResult.failure("Invalid username or password.");
         }
 
-        AuthUser user = optionalUser.get();
+        User user = optionalUser.get();
 
         boolean passwordMatches = passwordHasher.verifyPassword(
                 password,
@@ -85,7 +87,7 @@ public class AuthService {
         return sessionManager.isLoggedIn(sessionToken);
     }
 
-    public Optional<AuthUser> getCurrentUser(String sessionToken) {
+    public Optional<User> getCurrentUser(String sessionToken) {
         return sessionManager.getSession(sessionToken).map(Session::getUser);
     }
     // validates registration input, return error if it is invalid

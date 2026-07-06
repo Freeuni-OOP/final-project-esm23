@@ -1,5 +1,7 @@
 package com.quizwebsite.authModule;
 
+import com.quizwebsite.model.User;
+
 public class AuthResult {
 
     // Indicates whether the auth attempt was successful or not
@@ -7,18 +9,18 @@ public class AuthResult {
     // A message to be displayed to the user, if it was success or if it was error
     private final String message;
     // The user object if the auth attempt was successful, otherwise null
-    private final AuthUser user;
+    private final User user;
     // The session token if the auth attempt was successful, otherwise null
     private final String sessionToken;
     // construct
-    private AuthResult(boolean success, String message, AuthUser user, String sessionToken) {
+    private AuthResult(boolean success, String message, User user, String sessionToken) {
         this.success = success;
         this.message = message;
         this.user = user;
         this.sessionToken = sessionToken;
     }
     // creates a success result
-    public static AuthResult success(String message, AuthUser user, String sessionToken) {
+    public static AuthResult success(String message, User user, String sessionToken) {
         return new AuthResult(true, message, user, sessionToken);
     }
     // failed authentication reuslt , in this case user and session tokens are null
@@ -34,7 +36,7 @@ public class AuthResult {
         return message;
     }
 
-    public AuthUser getUser() {
+    public User getUser() {
         return user;
     }
 
