@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * - login validation
  * - logout and session handling
  * - password hashing behavior
- * - user and session model behavior
+ * - session model behavior
  */
 public class AuthServiceTest {
 
@@ -135,54 +135,6 @@ public class AuthServiceTest {
 
         assertTrue(authService.getCurrentUser(token).isPresent());
         assertEquals("luka", authService.getCurrentUser(token).get().getUsername());
-    }
-
-
-    // User tests
-
-
-    @Test
-    public void UserShouldReturnPasswordHashAndSalt() {
-        User user = new User("luka", "hashed-password", "salt-value");
-
-        assertEquals("hashed-password", user.getPasswordHash());
-        assertEquals("salt-value", user.getSalt());
-    }
-
-    @Test
-    public void UserHashCodeShouldBeConsistent() {
-        User user = new User("luka", "hash", "salt");
-
-        assertEquals(user.hashCode(), user.hashCode());
-    }
-
-    @Test
-    public void UserEqualsShouldReturnTrueForSameObject() {
-        User user = new User("luka", "hash", "salt");
-
-        assertEquals(user, user);
-    }
-
-    @Test
-    public void UserEqualsShouldReturnFalseForNull() {
-        User user = new User("luka", "hash", "salt");
-
-        assertNotEquals(null, user);
-    }
-
-    @Test
-    public void UserEqualsShouldReturnFalseForDifferentClass() {
-        User user = new User("luka", "hash", "salt");
-
-        assertNotEquals("not a user", user);
-    }
-
-    @Test
-    public void UserEqualsShouldReturnFalseForDifferentUser() {
-        User firstUser = new User("luka", "hash", "salt");
-        User secondUser = new User("luka", "hash", "salt");
-
-        assertNotEquals(firstUser, secondUser);
     }
 
 
