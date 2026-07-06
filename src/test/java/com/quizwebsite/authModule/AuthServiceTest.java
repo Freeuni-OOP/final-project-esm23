@@ -1,6 +1,7 @@
 package com.quizwebsite.authModule;
 
 import com.quizwebsite.model.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,16 +16,23 @@ import static org.junit.jupiter.api.Assertions.*;
  * - password hashing behavior
  * - session model behavior
  */
+
+ // Uses InMemoryAuthRepository so no real database is touched
+ // JdbcAuthRepositoryTest for the DB-backed integration tests.
+
 public class AuthServiceTest {
 
+    private AuthService authService;
+
+    @BeforeEach
+    public void setUp() {
+        authService = new AuthService(new InMemoryAuthRepository());
+    }
 
     // Registration tests
 
-
     @Test
     public void registerShouldCreateUserWhenInputIsValid() {
-        AuthService authService = new AuthService();
-
         AuthResult result = authService.register("luka", "password123");
 
         assertTrue(result.isSuccess());
@@ -35,8 +43,6 @@ public class AuthServiceTest {
 
     @Test
     public void registerShouldFailWhenUsernameAlreadyExists() {
-        AuthService authService = new AuthService();
-
         authService.register("luka", "password123");
         AuthResult secondResult = authService.register("luka", "password123");
 
@@ -46,8 +52,6 @@ public class AuthServiceTest {
 
     @Test
     public void registerShouldFailWhenUsernameIsTooShort() {
-        AuthService authService = new AuthService();
-
         AuthResult result = authService.register("lu", "password123");
 
         assertFalse(result.isSuccess());
@@ -56,8 +60,6 @@ public class AuthServiceTest {
 
     @Test
     public void registerShouldFailWhenPasswordIsTooShort() {
-        AuthService authService = new AuthService();
-
         AuthResult result = authService.register("luka", "123");
 
         assertFalse(result.isSuccess());
@@ -70,8 +72,6 @@ public class AuthServiceTest {
 
     @Test
     public void loginShouldReturnSessionTokenWhenCredentialsAreCorrect() {
-        AuthService authService = new AuthService();
-
         authService.register("luka", "password123");
         AuthResult loginResult = authService.login("luka", "password123");
 
@@ -83,8 +83,6 @@ public class AuthServiceTest {
 
     @Test
     public void loginShouldFailWhenPasswordIsWrong() {
-        AuthService authService = new AuthService();
-
         authService.register("luka", "password123");
         AuthResult loginResult = authService.login("luka", "wrongpassword");
 
@@ -95,8 +93,6 @@ public class AuthServiceTest {
 
     @Test
     public void loginShouldFailWhenUserDoesNotExist() {
-        AuthService authService = new AuthService();
-
         AuthResult loginResult = authService.login("unknown", "password123");
 
         assertFalse(loginResult.isSuccess());
@@ -110,8 +106,6 @@ public class AuthServiceTest {
 
     @Test
     public void logoutShouldRemoveActiveSession() {
-        AuthService authService = new AuthService();
-
         authService.register("luka", "password123");
         AuthResult loginResult = authService.login("luka", "password123");
 
@@ -126,8 +120,6 @@ public class AuthServiceTest {
 
     @Test
     public void getCurrentUserShouldReturnLoggedInUser() {
-        AuthService authService = new AuthService();
-
         authService.register("luka", "password123");
         AuthResult loginResult = authService.login("luka", "password123");
 
@@ -206,25 +198,10 @@ public class AuthServiceTest {
     }
 
 
-    // AuthService integration tests
-
-    @Test
-    public void authServiceSecondConstructorShouldWorkWithCustomRepository() {
-        AuthRepository repository = new InMemoryAuthRepository();
-        AuthService authService = new AuthService(repository);
-
-        AuthResult registerResult = authService.register("luka", "password123");
-        AuthResult loginResult = authService.login("luka", "password123");
-
-        assertTrue(registerResult.isSuccess());
-        assertTrue(loginResult.isSuccess());
-        assertNotNull(loginResult.getSessionToken());
-    }
+    // AuthService integration tests (still in-memory; see JdbcAuthRepositoryTest for real-DB coverage)
 
     @Test
     public void authServiceShouldRejectDuplicateUsernameIgnoringCaseAndSpaces() {
-        AuthService authService = new AuthService();
-
         AuthResult firstResult = authService.register("  Luka  ", "password123");
         AuthResult secondResult = authService.register("luka", "password123");
 
@@ -235,22 +212,16 @@ public class AuthServiceTest {
 
     @Test
     public void getCurrentUserShouldReturnEmptyWhenTokenIsNull() {
-        AuthService authService = new AuthService();
-
         assertTrue(authService.getCurrentUser(null).isEmpty());
     }
 
     @Test
     public void getCurrentUserShouldReturnEmptyWhenTokenIsBlank() {
-        AuthService authService = new AuthService();
-
         assertTrue(authService.getCurrentUser("   ").isEmpty());
     }
 
     @Test
     public void getCurrentUserShouldReturnEmptyWhenTokenIsInvalid() {
-        AuthService authService = new AuthService();
-
         assertTrue(authService.getCurrentUser("invalid-token").isEmpty());
     }
 
