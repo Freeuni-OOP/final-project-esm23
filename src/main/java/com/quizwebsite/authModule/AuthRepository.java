@@ -1,5 +1,7 @@
 package com.quizwebsite.authModule;
 
+import com.quizwebsite.model.User;
+
 import java.util.Optional;
 
 public interface AuthRepository {
@@ -8,5 +10,5 @@ public interface AuthRepository {
 
     Optional<AuthUser> findByUsername(String username);
 
-    void save(AuthUser user);
+    void save(User user);
 }
