@@ -8,7 +8,7 @@ public interface AuthRepository {
 
     boolean existsByUsername(String username);
 
-    Optional<AuthUser> findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
     void save(User user);
 }
