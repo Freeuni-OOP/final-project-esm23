@@ -40,10 +40,7 @@ public class AuthService {
         String passwordHash = passwordHasher.hashPassword(password, salt);
 
         User user = new User(normalizedUsername, passwordHash, salt);
-        authRepository.save(user);
-
-        User savedUser = authRepository.findByUsername(normalizedUsername)
-                .orElseThrow(()-> new IllegalStateException("Username not found."));
+        User savedUser = authRepository.save(user);
 
         return AuthResult.success("Registration successful.", savedUser, null);
     }
