@@ -13,6 +13,7 @@
             <li><a href="createQuiz.jsp">Create a new quiz</a></li>
             <li><a href="TakeQuizServlet">Take a quiz</a></li>
         </ul>
+         <li><a href="LogoutServlet">Log out</a></li>
     <% } %>
 
     <!-- TODO: placeholder landing page - flesh out with real quiz listing/navigation -->
