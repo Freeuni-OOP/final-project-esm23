@@ -24,7 +24,7 @@ public class InMemoryAuthRepository implements AuthRepository {
     }
 
     @Override
-    public void save(User user) {
+    public User save(User user) {
         User stored = new User(
                 idGenerator.getAndIncrement(),
                 user.getUsername(),
@@ -34,6 +34,7 @@ public class InMemoryAuthRepository implements AuthRepository {
                 LocalDateTime.now()
         );
         usersByUsername.put(normalizeUsername(user.getUsername()), stored);
+        return stored;
     }
 
     private String normalizeUsername(String username) {
