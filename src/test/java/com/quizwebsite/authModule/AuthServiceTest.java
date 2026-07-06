@@ -1,5 +1,6 @@
 package com.quizwebsite.authModule;
 
+import com.quizwebsite.model.User;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -137,49 +138,49 @@ public class AuthServiceTest {
     }
 
 
-    // AuthUser tests
+    // User tests
 
 
     @Test
-    public void authUserShouldReturnPasswordHashAndSalt() {
-        AuthUser user = new AuthUser("luka", "hashed-password", "salt-value");
+    public void UserShouldReturnPasswordHashAndSalt() {
+        User user = new User("luka", "hashed-password", "salt-value");
 
         assertEquals("hashed-password", user.getPasswordHash());
         assertEquals("salt-value", user.getSalt());
     }
 
     @Test
-    public void authUserHashCodeShouldBeConsistent() {
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+    public void UserHashCodeShouldBeConsistent() {
+        User user = new User("luka", "hash", "salt");
 
         assertEquals(user.hashCode(), user.hashCode());
     }
 
     @Test
-    public void authUserEqualsShouldReturnTrueForSameObject() {
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+    public void UserEqualsShouldReturnTrueForSameObject() {
+        User user = new User("luka", "hash", "salt");
 
         assertEquals(user, user);
     }
 
     @Test
-    public void authUserEqualsShouldReturnFalseForNull() {
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+    public void UserEqualsShouldReturnFalseForNull() {
+        User user = new User("luka", "hash", "salt");
 
         assertNotEquals(null, user);
     }
 
     @Test
-    public void authUserEqualsShouldReturnFalseForDifferentClass() {
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+    public void UserEqualsShouldReturnFalseForDifferentClass() {
+        User user = new User("luka", "hash", "salt");
 
         assertNotEquals("not a user", user);
     }
 
     @Test
-    public void authUserEqualsShouldReturnFalseForDifferentUser() {
-        AuthUser firstUser = new AuthUser("luka", "hash", "salt");
-        AuthUser secondUser = new AuthUser("luka", "hash", "salt");
+    public void UserEqualsShouldReturnFalseForDifferentUser() {
+        User firstUser = new User("luka", "hash", "salt");
+        User secondUser = new User("luka", "hash", "salt");
 
         assertNotEquals(firstUser, secondUser);
     }
@@ -190,7 +191,7 @@ public class AuthServiceTest {
 
     @Test
     public void sessionShouldReturnAllSessionFields() {
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+        User user = new User("luka", "hash", "salt");
         Session session = new Session(user);
 
         assertNotNull(session.getToken());
@@ -201,7 +202,7 @@ public class AuthServiceTest {
     @Test
     public void sessionManagerShouldCreateAndFindSession() {
         SessionManager sessionManager = new SessionManager();
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+        User user = new User("luka", "hash", "salt");
 
         Session session = sessionManager.createSession(user);
 
@@ -234,7 +235,7 @@ public class AuthServiceTest {
     @Test
     public void sessionManagerLogoutShouldRemoveSession() {
         SessionManager sessionManager = new SessionManager();
-        AuthUser user = new AuthUser("luka", "hash", "salt");
+        User user = new User("luka", "hash", "salt");
 
         Session session = sessionManager.createSession(user);
 
