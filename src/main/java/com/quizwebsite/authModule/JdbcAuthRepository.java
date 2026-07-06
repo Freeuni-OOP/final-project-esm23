@@ -4,6 +4,7 @@ import com.quizwebsite.dao.UserDAO;
 import com.quizwebsite.model.User;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 // MySQL-backed AuthRepository used by AuthService in production; delegates to UserDAO.
@@ -37,9 +38,10 @@ public class JdbcAuthRepository implements AuthRepository {
 	}
 
 	@Override
-	public void save(User user) {
+	public User save(User user) {
 		try {
-			userDAO.insert(user);
+			long id = userDAO.insert(user);
+			return new User(id, user.getUsername(), user.getPasswordHash(), user.getSalt(), user.isAdmin(), LocalDateTime.now());
 		} catch (SQLException e) {
 			throw new RuntimeException("Failed to save user", e);
 		}

@@ -26,13 +26,12 @@ public class AuthService {
     // registers new user this method also validates input if username already exists, hashes the password and save its data
     public AuthResult register(String username, String password) {
         String validationError = validateRegistrationInput(username, password);
-        // CHECKING IF ITS VALID OR NOT
         if (validationError != null) {
             return AuthResult.failure(validationError);
         }
         // normilizing username so Luka and luka are treated the same
         String normalizedUsername = normalizeUsername(username);
-        // if it already exists
+
         if (authRepository.existsByUsername(normalizedUsername)) {
             return AuthResult.failure("Username already exists.");
         }
@@ -43,8 +42,12 @@ public class AuthService {
         User user = new User(normalizedUsername, passwordHash, salt);
         authRepository.save(user);
 
-        return AuthResult.success("Registration successful.", user, null);
+        User savedUser = authRepository.findByUsername(normalizedUsername)
+                .orElseThrow(()-> new IllegalStateException("Username not found."));
+
+        return AuthResult.success("Registration successful.", savedUser, null);
     }
+
     // log in an existing user the method checks the user and pass, and verifies it and after that creates session and at lat returns session token
     public AuthResult login(String username, String password) {
         if (username == null || username.isBlank()) {
@@ -54,28 +57,21 @@ public class AuthService {
         if (password == null || password.isBlank()) {
             return AuthResult.failure("Password is required.");
         }
-
         String normalizedUsername = normalizeUsername(username);
         Optional<User> optionalUser = authRepository.findByUsername(normalizedUsername);
-
         if (optionalUser.isEmpty()) {
             return AuthResult.failure("Invalid username or password.");
         }
-
         User user = optionalUser.get();
-
         boolean passwordMatches = passwordHasher.verifyPassword(
                 password,
                 user.getSalt(),
                 user.getPasswordHash()
         );
-
         if (!passwordMatches) {
             return AuthResult.failure("Invalid username or password.");
         }
-
         Session session = sessionManager.createSession(user);
-
         return AuthResult.success("Login successful.", user, session.getToken());
     }
 
@@ -95,19 +91,15 @@ public class AuthService {
         if (username == null || username.isBlank()) {
             return "Username is required.";
         }
-
         if (username.trim().length() < 3) {
             return "Username must be at least 3 characters.";
         }
-
         if (password == null || password.isBlank()) {
             return "Password is required.";
         }
-
         if (password.length() < 6) {
             return "Password must be at least 6 characters.";
         }
-
         return null;
     }
 
