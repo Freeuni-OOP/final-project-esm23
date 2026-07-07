@@ -48,7 +48,7 @@ public class ViewQuizServlet extends HttpServlet {
 			}
 			// check ownership
 			if(quiz.getCreatorId() != user.getId()) {
-				// if the user is the creator, rediret (answer key should be visible only to the creator)
+				// if the user is NOT the creator, rediret (answer key should be visible only to the creator)
 				response.sendRedirect("index.jsp");
 				return;
 			}
