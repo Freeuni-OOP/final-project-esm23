@@ -10,7 +10,7 @@
     <% } else { %>
         <p>You are logged in.</p>
         <ul>
-            <li><a href="createQuiz.jsp">Create a new quiz</a></li>
+            <li><a href="WEB-INF/jsp/createQuiz.jsp">Create a new quiz</a></li>
             <li><a href="TakeQuizServlet">Take a quiz</a></li>
         </ul>
          <li><a href="LogoutServlet">Log out</a></li>
