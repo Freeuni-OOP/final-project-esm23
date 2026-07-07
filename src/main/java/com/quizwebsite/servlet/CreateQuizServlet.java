@@ -59,7 +59,7 @@ public class CreateQuizServlet extends HttpServlet {
             session.setAttribute("newQuizTitle", title.trim());
             session.setAttribute("questionPosition", 1); //first question means position 1//
 
-            response.sendRedirect("addQuestion.jsp");
+            response.sendRedirect("AddQuestionServlet");
 
         } catch (SQLException e) {
             throw new ServletException("DB error creating quiz", e);

@@ -18,6 +18,21 @@ import java.sql.SQLException;
 @WebServlet("/AddQuestionServlet")
 public class AddQuestionServlet extends HttpServlet {
 
+    //serves the add-question form (mid-creation) or the finished-quiz confirmation, since both jsps live under WEB-INF and can't be requested directly//
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        if (session.getAttribute("newQuizId") != null) {
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
+        } else if (request.getParameter("quizId") != null) {
+            request.getRequestDispatcher("/WEB-INF/jsp/quizCreated.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("CreateQuizServlet");
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -112,10 +127,10 @@ public class AddQuestionServlet extends HttpServlet {
                 session.removeAttribute("newQuizTitle");
                 session.removeAttribute("questionPosition");
 
-                response.sendRedirect("quizCreated.jsp?quizId=" + savedQuizId);
+                response.sendRedirect("AddQuestionServlet?quizId=" + savedQuizId);
             } else {
                 //adds another question//
-                response.sendRedirect("addQuestion.jsp");
+                response.sendRedirect("AddQuestionServlet");
             }
 
         } catch (SQLException e) {
