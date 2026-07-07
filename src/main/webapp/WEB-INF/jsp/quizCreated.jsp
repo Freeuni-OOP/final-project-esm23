@@ -15,6 +15,6 @@
     <% if (quizId != null) { %>
         <a href="viewQuiz.jsp?quizId=<%= quizId %>">View Quiz</a> |
     <% } %>
-    <a href="home.jsp">Go to Home</a>
+    <a href="index.jsp">Go to Home</a>
 </body>
 </html>
