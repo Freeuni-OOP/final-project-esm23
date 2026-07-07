@@ -18,17 +18,13 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * Handles taking a quiz end to end:
- *   GET  ?quizId=X[&practice=true]   -> starts a new attempt
- *   GET  ?action=next                -> advances to the next question (multi-page mode)
- *   GET  ?action=finish              -> finalizes after the last immediate-correction feedback screen
- *   POST (from the one-page form)    -> grades everything at once
- *   POST (from the single-question form, with a "response" param) -> records one answer
- *
- * Quiz-taking state (current index, accumulated responses, start time) is kept
- * in the HttpSession for the duration of the attempt and cleared once scored.
- */
+// handles the whole quiz-taking flow:
+// start a new attempt
+// next question (multi-page mode)
+// wrap up after the last immediate-correction screen
+// grade everything at once
+// save one answer
+
 @WebServlet("/TakeQuizServlet")
 public class TakeQuizServlet extends HttpServlet {
 
@@ -40,11 +36,11 @@ public class TakeQuizServlet extends HttpServlet {
     private final AnswerAttemptDAO answerAttemptDAO = new AnswerAttemptDAO();
     private final UserDAO userDAO = new UserDAO();
 
-    //delegated service structure responsible for computing point maps and saving attempts to MySQL//
+    //does the scoring + saves attempts to the db
     private final QuizScoringService scoringService =
             new QuizScoringService(questionDAO, answerDAO, attemptDAO, answerAttemptDAO, optionDAO);
 
-    //session Attribute Constant Keys to prevent typos across multi-stage lookups//
+    //session attribute keys
     private static final String SESS_QUIZ_ID = "takeQuiz_quizId";
     private static final String SESS_PRACTICE = "takeQuiz_isPractice";
     private static final String SESS_START_TIME = "takeQuiz_startTime";
@@ -54,7 +50,7 @@ public class TakeQuizServlet extends HttpServlet {
     private static final String SESS_QUESTIONS_BY_ID = "takeQuiz_questionsById";
 
 
-    //orchestrates routing for quiz initialization or page transitions in multi-page sequences//
+    //routes GET based on the action param
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -76,7 +72,7 @@ public class TakeQuizServlet extends HttpServlet {
         }
     }
 
-    //receives and processes submitted user form inputs for evaluation//
+    //handles the submitted answers, either from the one-page form or the single-question form
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -97,7 +93,7 @@ public class TakeQuizServlet extends HttpServlet {
                 return;
             }
 
-            //branch logic based on the quiz structure flag configuration//
+            //one-page quizzes submit everything at once, others go question by question
             if (quiz.isOnePage()) {
                 submitOnePage(request, response, session, user, quiz);
             } else {
@@ -110,8 +106,7 @@ public class TakeQuizServlet extends HttpServlet {
 
     // ---- starting an attempt ----------//
 
-
-    //sets up active session attributes, processes presentation options (randomization) and serves the initial workspace//
+    //loads the quiz + questions, sets up session state, and renders the first page
     private void startQuiz(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws SQLException, ServletException, IOException {
 
@@ -136,14 +131,14 @@ public class TakeQuizServlet extends HttpServlet {
             Collections.shuffle(questions);
         }
 
-        //eagerly stitches layout choices onto polymorphic MultipleChoice definitions before rendering to optimize view generation//
+        //multiple choice questions need their options loaded before we can render them
         for (Question q : questions) {
             if (q instanceof MultipleChoice mc) {
                 mc.setOptions(optionDAO.findByQuestion(q.getId()));
             }
         }
 
-        //initializes session metrics//
+        //start tracking this attempt in the session
         session.setAttribute(SESS_QUIZ_ID, quizId);
         session.setAttribute(SESS_PRACTICE, practice);
         session.setAttribute(SESS_START_TIME, System.currentTimeMillis());
@@ -157,7 +152,7 @@ public class TakeQuizServlet extends HttpServlet {
             return;
         }
 
-        //setup indexing pointers required to walk sequentially through multi-page layouts//
+        //multi-page mode needs an ordered list + index to know where we are
         List<Long> order = new ArrayList<>();
         Map<Long, Question> byId = new LinkedHashMap<>();
         for (Question q : questions) {
@@ -175,7 +170,7 @@ public class TakeQuizServlet extends HttpServlet {
     // ---- multi-page mode ---------//
 
 
-    //advances the internal tracking pointer index by 1 and steps the view page forward//
+    //bumps the index by one and renders that question, or finishes if we're past the last one
     @SuppressWarnings("unchecked")
     private void advanceToNextQuestion(HttpServletRequest request, HttpServletResponse response, HttpSession session)
             throws SQLException, ServletException, IOException {
@@ -189,7 +184,6 @@ public class TakeQuizServlet extends HttpServlet {
         Quiz quiz = quizDAO.findById(quizId);
         int index = (Integer) session.getAttribute(SESS_INDEX) + 1;
 
-        //catches final boundaries if an application flows past the list limit//
         if (index >= order.size()) {
             finalizeFromSession(request, response, session, (User) session.getAttribute("user"));
             return;
@@ -201,7 +195,8 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
-    //Processes the input for a single question. If Immediate Correction is checked, it computes a row-level evaluation immediately instead of proceeding//
+    //saves the answer for the current question. if immediate correction is on we grade it
+    //right away and re-show the same question with feedback instead of moving on
     @SuppressWarnings("unchecked")
     private void submitSingleQuestion(HttpServletRequest request, HttpServletResponse response,
                                       HttpSession session, User user, Quiz quiz) throws SQLException, ServletException, IOException {
@@ -220,11 +215,10 @@ public class TakeQuizServlet extends HttpServlet {
         String raw = request.getParameter("response");
         List<String> answer = (raw == null || raw.trim().isEmpty()) ? List.of() : List.of(raw.trim());
 
-        //caches current response intermediate state inside the session maps//
+        //save this answer into the session before we decide what to do next
         Map<Long, List<String>> responses = (Map<Long, List<String>>) session.getAttribute(SESS_RESPONSES);
         responses.put(questionId, answer);
 
-        //grades immediately on submission and re-render current index//
         if (quiz.isImmediateCorrection()) {
             List<Answer> correct = answerDAO.findByQuestion(questionId);
             int earned = question.grade(answer, correct);
@@ -239,7 +233,7 @@ public class TakeQuizServlet extends HttpServlet {
             return;
         }
 
-        //standard progression logic when Immediate Correction is turned off//
+        //no immediate correction, just move on to the next question (or finish if this was the last one)
         if (index == order.size() - 1) {
             finalizeFromSession(request, response, session, user);
         } else {
@@ -249,7 +243,7 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
-    //Central utility used to push localized request variables into the rendering template scope//
+    //puts the common attributes on the request and forwards to the single-question page
     private void renderQuestionAt(HttpServletRequest request, HttpServletResponse response, Quiz quiz,
                                   List<Long> order, Map<Long, Question> byId, int index, AnswerReviewRow feedback)
             throws ServletException, IOException {
@@ -260,7 +254,7 @@ public class TakeQuizServlet extends HttpServlet {
         request.setAttribute("questionNumber", index + 1);
         request.setAttribute("totalQuestions", order.size());
         request.setAttribute("isLastQuestion", index == order.size() - 1);
-        request.setAttribute("feedback", feedback); //holds instantaneous flashcard results, if applicable//
+        request.setAttribute("feedback", feedback); //null unless we're showing immediate-correction feedback
         request.getRequestDispatcher("/WEB-INF/jsp/takeQuizQuestion.jsp").forward(request, response);
     }
 
@@ -268,7 +262,7 @@ public class TakeQuizServlet extends HttpServlet {
     // ---- one-page mode ------------//
 
 
-    //direct execution entrypoint for single-form full quiz dumps//
+    //one-page quizzes submit everything at once, so just parse the responses and finish
     private void submitOnePage(HttpServletRequest request, HttpServletResponse response,
                                HttpSession session, User user, Quiz quiz) throws SQLException, ServletException, IOException {
 
@@ -277,7 +271,7 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
-    //scans incoming parameter keys extracting inputs prefix-mapped with 'q_'//
+    //the one-page form names its inputs "q_<questionId>", so pull those out
     private Map<Long, List<String>> collectOnePageResponses(HttpServletRequest request) {
         Map<Long, List<String>> responses = new LinkedHashMap<>();
         Enumeration<String> names = request.getParameterNames();
@@ -290,7 +284,7 @@ public class TakeQuizServlet extends HttpServlet {
                 long questionId = Long.parseLong(name.substring(2));
                 responses.put(questionId, List.of(value.trim()));
             } catch (NumberFormatException ignored) {
-                //avoids processing form control elements that are not questions//
+                //not a question field, skip it
             }
         }
         return responses;
@@ -300,7 +294,7 @@ public class TakeQuizServlet extends HttpServlet {
     // ---- shared finalize / scoring --------//
 
 
-    //wrapper that retrieves data caches from the session scope to hand off to the master finish sequence//
+    //pulls the responses saved in the session and hands off to finish()
     @SuppressWarnings("unchecked")
     private void finalizeFromSession(HttpServletRequest request, HttpServletResponse response,
                                      HttpSession session, User user) throws SQLException, ServletException, IOException {
@@ -315,7 +309,7 @@ public class TakeQuizServlet extends HttpServlet {
         finish(request, response, session, user, quiz, responses);
     }
 
-    //Computes total time, handles scoring metrics via execution services, gathers layout review historical DTOs, updates leaderboards, and clears state//
+    //scores the attempt, saves it, builds the results page data, and forwards to quizResults.jsp
     private void finish(HttpServletRequest request, HttpServletResponse response, HttpSession session,
                         User user, Quiz quiz, Map<Long, List<String>> responses) throws SQLException, ServletException, IOException {
 
@@ -324,10 +318,9 @@ public class TakeQuizServlet extends HttpServlet {
         int timeTakenSeconds = startTime == null ? 0 : (int) ((System.currentTimeMillis() - startTime) / 1000);
         boolean isPractice = practice != null && practice;
 
-        //delegates calculations and transactional insertions down to service layers//
         ScoringResult result = scoringService.score(user.getId(), quiz.getId(), responses, timeTakenSeconds, isPractice);
 
-        //builds un-linked presentation rows for quizResults.jsp to render historical breakdowns efficiently//
+        //build the per-question review rows for the results page
         List<Question> questions = questionDAO.findByQuiz(quiz.getId());
         List<AnswerReviewRow> review = new ArrayList<>();
         for (Question q : questions) {
@@ -344,7 +337,7 @@ public class TakeQuizServlet extends HttpServlet {
                     earned > 0, correctAnswerText(q, correct), earned, max));
         }
 
-        //pulls current leaderboard data snippets (bypassed entirely for practice modes)//
+        //no leaderboard for practice runs
         List<QuizAttempt> topScores = isPractice ? List.of() : attemptDAO.findTopScores(quiz.getId(), 5);
         Map<Long, String> topScoreNames = new LinkedHashMap<>();
         for (QuizAttempt a : topScores) {
@@ -352,7 +345,6 @@ public class TakeQuizServlet extends HttpServlet {
             topScoreNames.put(a.getId(), scorer != null ? scorer.getUsername() : "unknown");
         }
 
-        //flushes all transactional variables out of the session block to finalize the run loop//
         clearQuizSession(session);
 
         request.setAttribute("quiz", quiz);
@@ -365,7 +357,7 @@ public class TakeQuizServlet extends HttpServlet {
     }
 
 
-    //flushes state trackers out of memory to close out the session loop safely/
+    //done scoring, clear out the attempt state so a stale session cant mess up the next attempt
     private void clearQuizSession(HttpSession session) {
         session.removeAttribute(SESS_QUIZ_ID);
         session.removeAttribute(SESS_PRACTICE);
@@ -383,7 +375,7 @@ public class TakeQuizServlet extends HttpServlet {
         return 0;
     }
 
-    //generates a localized fallback string showing matching answer patterns or selection literals//
+    //text to show as "the correct answer was..." on the results page
     private String correctAnswerText(Question question, List<Answer> correct) {
         if (question instanceof MultipleChoice mc) {
             for (QuestionOption opt : mc.getOptions()) {
