@@ -27,11 +27,6 @@ public class AddQuestionServlet extends HttpServlet {
         Long quizId   = (Long)    session.getAttribute("newQuizId");
         Integer position = (Integer) session.getAttribute("questionPosition");
 
-        if (user == null || quizId == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
         String typeStr      = request.getParameter("questionType");
         String questionText = request.getParameter("questionText");
         String action       = request.getParameter("action"); //"addAnother" or "finish"//
