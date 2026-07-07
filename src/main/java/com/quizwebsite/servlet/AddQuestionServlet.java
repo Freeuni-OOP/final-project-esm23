@@ -34,7 +34,7 @@ public class AddQuestionServlet extends HttpServlet {
         //does validation//
         if (questionText == null || questionText.trim().isEmpty()) {
             request.setAttribute("error", "Question text cannot be empty.");
-            request.getRequestDispatcher("addQuestion.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
             return;
         }
 
@@ -43,7 +43,7 @@ public class AddQuestionServlet extends HttpServlet {
             type = QuestionType.valueOf(typeStr);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Invalid question type.");
-            request.getRequestDispatcher("addQuestion.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
             return;
         }
 

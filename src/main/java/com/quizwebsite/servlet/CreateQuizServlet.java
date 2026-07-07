@@ -35,7 +35,7 @@ public class CreateQuizServlet extends HttpServlet {
         if (title == null || title.trim().isEmpty()) {
             request.setAttribute("error", "Title cannot be empty.");
             request.setAttribute("description", description);
-            request.getRequestDispatcher("createQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/createQuiz.jsp").forward(request, response);
             return;
         }
 

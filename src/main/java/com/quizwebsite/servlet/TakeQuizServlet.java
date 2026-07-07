@@ -153,7 +153,7 @@ public class TakeQuizServlet extends HttpServlet {
 
         if (quiz.isOnePage()) {
             request.setAttribute("questions", questions);
-            request.getRequestDispatcher("takeQuizOnePage.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/takeQuizOnePage.jsp").forward(request, response);
             return;
         }
 
@@ -261,7 +261,7 @@ public class TakeQuizServlet extends HttpServlet {
         request.setAttribute("totalQuestions", order.size());
         request.setAttribute("isLastQuestion", index == order.size() - 1);
         request.setAttribute("feedback", feedback); //holds instantaneous flashcard results, if applicable//
-        request.getRequestDispatcher("takeQuizQuestion.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/takeQuizQuestion.jsp").forward(request, response);
     }
 
 
@@ -361,7 +361,7 @@ public class TakeQuizServlet extends HttpServlet {
         request.setAttribute("isPractice", isPractice);
         request.setAttribute("topScores", topScores);
         request.setAttribute("topScoreNames", topScoreNames);
-        request.getRequestDispatcher("quizResults.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/jsp/quizResults.jsp").forward(request, response);
     }
 
 
