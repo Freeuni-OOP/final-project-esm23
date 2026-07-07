@@ -62,10 +62,10 @@ public class ViewQuizServlet extends HttpServlet {
 
 
 			request.setAttribute("quiz", quiz);
-    	request.setAttribute("questions", questions);
+			request.setAttribute("questions", questions);
 			request.getRequestDispatcher("/WEB-INF/jsp/viewQuiz.jsp").forward(request, response);
 		}catch (SQLException e) {
-			throw new ServletException("Failed while loading quiz", e);
+		throw new ServletException("Failed while loading quiz", e);
 		}
 	}
 }
