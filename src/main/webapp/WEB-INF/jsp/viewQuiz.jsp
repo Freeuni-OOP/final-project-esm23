@@ -32,8 +32,8 @@
         <% } %>
     </ul>
     <% } else if (q.getType() == QuestionType.PICTURE_RESPONSE) {  %>
-        <img src="<% q.getImageUrl() %>" alt="question image">
-        <input type="text" name="q<%=q.getId() %>"
+        <img src="<%= q.getImageUrl() %>" alt="question image">
+        <input type="text" name="q<%=q.getId() %>">
     <% } else { %>
         <input type="text" name="q<%= q.getId() %>">
     <% } %>
