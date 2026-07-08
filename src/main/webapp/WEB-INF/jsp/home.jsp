@@ -184,5 +184,11 @@
         <% } %>
     <% } %>
 
+    <%-- Admin stats panel--%>
+    <% if (user != null && user.isAdmin()) { %>
+        <li><a href="AdminStatsServlet">View site statistics</a></li>
+        <br/>
+    <% } %>
+
 </body>
 </html>
