@@ -20,7 +20,7 @@ import java.io.IOException;
 				"/AdminPromoteUserServlet",
 				"/AdminStatsServlet",
 				"/AdminDeleteAnnouncementServlet",
-				"/create-annoucement"
+				"/create-announcement"
 })
 public class AdminFilter implements Filter {
 
