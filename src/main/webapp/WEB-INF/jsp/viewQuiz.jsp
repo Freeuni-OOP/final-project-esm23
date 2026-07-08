@@ -35,12 +35,10 @@
     </ul>
     <% } else if (q.getType() == QuestionType.PICTURE_RESPONSE) {  %>
         <img src="<%= q.getImageUrl() %>" alt="question image">
-        <input type="text" name="q<%=q.getId() %>">
         <% for (Answer a : q.getCorrectAnswers()) { %>
         <p style="color:green;font-weight:bold;"><%= a.getAnswerText() %> (correct)</p>
         <% } %>
     <% } else { %>
-        <input type="text" name="q<%= q.getId() %>">
         <% for (Answer a : q.getCorrectAnswers()) { %>
         <p style="color:green;font-weight:bold;"><%= a.getAnswerText() %> (correct)</p>
         <% } %>
