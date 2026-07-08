@@ -17,7 +17,7 @@ import java.io.IOException;
 // re-implementing the check in the servlet itself.
 
 
-@WebFilter(urlPatterns = {"/CreateQuizServlet", "/AddQuestionServlet", "/TakeQuizServlet", "/ViewQuizServlet"})
+@WebFilter(urlPatterns = {"/CreateQuizServlet", "/AddQuestionServlet", "/TakeQuizServlet", "/ReviewQuizServlet"})
 public class AuthFilter implements Filter {
 
 	@Override
