@@ -17,6 +17,13 @@ import java.sql.SQLException;
 @WebServlet("/CreateQuizServlet")
 public class CreateQuizServlet extends HttpServlet {
 
+    //serves the empty create-quiz form, bc the jsp is under WEB-INF and cant be requested directly
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/jsp/createQuiz.jsp").forward(request, response);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -24,23 +31,18 @@ public class CreateQuizServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
-        if (user == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
-        String title       = request.getParameter("title");
+        String title = request.getParameter("title");
         String description = request.getParameter("description");
-        boolean randomOrder         = request.getParameter("randomOrder")         != null;
-        boolean onePage             = request.getParameter("onePage")             != null;
+        boolean randomOrder  = request.getParameter("randomOrder") != null;
+        boolean onePage  = request.getParameter("onePage") != null;
         boolean immediateCorrection = request.getParameter("immediateCorrection") != null;
-        boolean practiceEnabled     = request.getParameter("practiceEnabled")     != null;
+        boolean practiceEnabled = request.getParameter("practiceEnabled") != null;
 
-        //does validation//
+        //does validation
         if (title == null || title.trim().isEmpty()) {
             request.setAttribute("error", "Title cannot be empty.");
             request.setAttribute("description", description);
-            request.getRequestDispatcher("createQuiz.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/createQuiz.jsp").forward(request, response);
             return;
         }
 
@@ -59,12 +61,12 @@ public class CreateQuizServlet extends HttpServlet {
 
             long quizId = quizDAO.insert(quiz);
 
-            //stores in session so addQuestion.jsp knows which quiz we're building//
+            //stores in session so addQuestion.jsp knows which quiz we're building
             session.setAttribute("newQuizId", quizId);
             session.setAttribute("newQuizTitle", title.trim());
-            session.setAttribute("questionPosition", 1); //first question means position 1//
+            session.setAttribute("questionPosition", 1); //first question means position 1
 
-            response.sendRedirect("addQuestion.jsp");
+            response.sendRedirect("AddQuestionServlet");
 
         } catch (SQLException e) {
             throw new ServletException("DB error creating quiz", e);

@@ -18,6 +18,21 @@ import java.sql.SQLException;
 @WebServlet("/AddQuestionServlet")
 public class AddQuestionServlet extends HttpServlet {
 
+    //serves the add-question form (mid-creation) or the finished-quiz confirmation, since both jsps live under WEB-INF and can't be requested directly//
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        if (session.getAttribute("newQuizId") != null) {
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
+        } else if (request.getParameter("quizId") != null) {
+            request.getRequestDispatcher("/WEB-INF/jsp/quizCreated.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("CreateQuizServlet");
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -27,11 +42,6 @@ public class AddQuestionServlet extends HttpServlet {
         Long quizId   = (Long)    session.getAttribute("newQuizId");
         Integer position = (Integer) session.getAttribute("questionPosition");
 
-        if (user == null || quizId == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
-
         String typeStr      = request.getParameter("questionType");
         String questionText = request.getParameter("questionText");
         String action       = request.getParameter("action"); //"addAnother" or "finish"//
@@ -39,7 +49,7 @@ public class AddQuestionServlet extends HttpServlet {
         //does validation//
         if (questionText == null || questionText.trim().isEmpty()) {
             request.setAttribute("error", "Question text cannot be empty.");
-            request.getRequestDispatcher("addQuestion.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
             return;
         }
 
@@ -48,7 +58,7 @@ public class AddQuestionServlet extends HttpServlet {
             type = QuestionType.valueOf(typeStr);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", "Invalid question type.");
-            request.getRequestDispatcher("addQuestion.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/jsp/addQuestion.jsp").forward(request, response);
             return;
         }
 
@@ -117,10 +127,10 @@ public class AddQuestionServlet extends HttpServlet {
                 session.removeAttribute("newQuizTitle");
                 session.removeAttribute("questionPosition");
 
-                response.sendRedirect("quizCreated.jsp?quizId=" + savedQuizId);
+                response.sendRedirect("AddQuestionServlet?quizId=" + savedQuizId);
             } else {
                 //adds another question//
-                response.sendRedirect("addQuestion.jsp");
+                response.sendRedirect("AddQuestionServlet");
             }
 
         } catch (SQLException e) {

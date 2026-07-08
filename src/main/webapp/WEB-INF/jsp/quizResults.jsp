@@ -13,7 +13,7 @@
     ScoringResult result = (ScoringResult) request.getAttribute("result");
     List<AnswerReviewRow> review = (List<AnswerReviewRow>) request.getAttribute("review");
 
-    //safety check to redirect if accessed outside normal servlet submission flow//
+    //safety check to redirect if accessed outside servlet flow
     if (quiz == null || result == null) {
         response.sendRedirect("index.jsp");
         return;
@@ -25,7 +25,7 @@
 
     int pct = result.maxScore() == 0 ? 0 : (int) Math.round(100.0 * result.score() / result.maxScore());
 
-    //cleans calculations for time display//
+    //clean calculations for time display
     int totalSec = Math.max(0, result.timeTakenSeconds());
     int min = totalSec / 60;
     int sec = totalSec % 60;
