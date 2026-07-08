@@ -33,11 +33,6 @@
         </li>
         <% } %>
     </ul>
-    <% } else if (q.getType() == QuestionType.PICTURE_RESPONSE) {  %>
-        <img src="<%= q.getImageUrl() %>" alt="question image">
-        <% for (Answer a : q.getCorrectAnswers()) { %>
-        <p style="color:green;font-weight:bold;"><%= a.getAnswerText() %> (correct)</p>
-        <% } %>
     <% } else { %>
         <% for (Answer a : q.getCorrectAnswers()) { %>
         <p style="color:green;font-weight:bold;"><%= a.getAnswerText() %> (correct)</p>
