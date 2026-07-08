@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+// This servlet is for user to see their own quizes after creating it.
+
 @WebServlet("/ViewQuizServlet")
 public class ViewQuizServlet extends HttpServlet {
 
