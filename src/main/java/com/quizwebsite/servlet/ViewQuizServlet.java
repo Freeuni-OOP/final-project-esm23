@@ -1,5 +1,6 @@
 package com.quizwebsite.servlet;
 
+import com.quizwebsite.dao.AnswerDAO;
 import com.quizwebsite.dao.QuestionDAO;
 import com.quizwebsite.dao.QuestionOptionDAO;
 import com.quizwebsite.dao.QuizDAO;
@@ -24,6 +25,7 @@ public class ViewQuizServlet extends HttpServlet {
 	private final QuizDAO quizDAO = new QuizDAO();
 	private final QuestionDAO questionDAO = new QuestionDAO();
 	private final QuestionOptionDAO optionDAO = new QuestionOptionDAO();
+	private final AnswerDAO answerDAO = new AnswerDAO();
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -57,6 +59,8 @@ public class ViewQuizServlet extends HttpServlet {
 			for (Question question : questions) {
 				if (question instanceof MultipleChoice mc) {
 					mc.setOptions(optionDAO.findByQuestion(question.getId()));
+				} else {
+					question.setCorrectAnswers(answerDAO.findByQuestion(question.getId()));
 				}
 			}
 
@@ -65,7 +69,7 @@ public class ViewQuizServlet extends HttpServlet {
 			request.setAttribute("questions", questions);
 			request.getRequestDispatcher("/WEB-INF/jsp/viewQuiz.jsp").forward(request, response);
 		}catch (SQLException e) {
-		throw new ServletException("Failed while loading quiz", e);
+			throw new ServletException("Failed while loading quiz", e);
 		}
 	}
 }
