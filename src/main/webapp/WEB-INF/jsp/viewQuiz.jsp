@@ -23,7 +23,9 @@
 <% for (Question q : questions) { %>
 <div style="margin-bottom:15px;">
     <p><strong><%= q.getQuestionText() %></strong></p>
-    <% if (q instanceof MultipleChoice mc) { %>
+    <% if (q instanceof MultipleChoice) {
+        MultipleChoice mc = (MultipleChoice) q;
+    %>
     <ul>
         <% for (QuestionOption opt : mc.getOptions()) { %>
         <li<%= opt.isCorrect() ? " style=\"color:green;font-weight:bold;\"" : "" %>>
