@@ -13,7 +13,7 @@
     <h1>Quiz Created Successfully!</h1>
     <p>Your quiz has been saved.</p>
     <% if (quizId != null) { %>
-        <a href="ViewQuizServlet<%= quizId %>">View Quiz</a> |
+        <a href="ViewQuizServlet?quizId=<%= quizId %>">View Quiz</a> |
     <% } %>
     <a href="index.jsp">Go to Home</a>
 </body>
