@@ -21,8 +21,8 @@ import java.util.List;
 
 // This servlet is for user to see their own quizes after creating it.
 
-@WebServlet("/ViewQuizServlet")
-public class ViewQuizServlet extends HttpServlet {
+@WebServlet("/ReviewQuizServlet")
+public class ReviewQuizServlet extends HttpServlet {
 
 	private final QuizDAO quizDAO = new QuizDAO();
 	private final QuestionDAO questionDAO = new QuestionDAO();
@@ -69,7 +69,7 @@ public class ViewQuizServlet extends HttpServlet {
 
 			request.setAttribute("quiz", quiz);
 			request.setAttribute("questions", questions);
-			request.getRequestDispatcher("/WEB-INF/jsp/viewQuiz.jsp").forward(request, response);
+			request.getRequestDispatcher("/WEB-INF/jsp/reviewQuiz.jsp").forward(request, response);
 		}catch (SQLException e) {
 			throw new ServletException("Failed while loading quiz", e);
 		}
