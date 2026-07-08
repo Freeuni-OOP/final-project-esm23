@@ -33,4 +33,11 @@ public class FillBlankTest {
 		assertEquals(1, q.grade(List.of("  Paris  "), answers));
 		assertEquals(0, q.grade(List.of("Tbilisi"), answers));
 	}
+
+	@Test
+	public void testSetAndGetCorrectAnswers() {
+		q.setCorrectAnswers(answers);
+		assertEquals(1, q.getCorrectAnswers().size());
+		assertEquals("Paris", q.getCorrectAnswers().getFirst().getAnswerText());
+	}
 }
