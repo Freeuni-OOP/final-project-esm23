@@ -16,6 +16,7 @@
     Integer pendingRequestCount = (Integer) request.getAttribute("pendingRequestCount");
     String REMOVE_USER_MSG = "Remove this user and all their data? This cannot be undone";
     String REMOVE_QUIZ_MSG = "Remove this quiz? This deletes all its questions and history.";
+    String CLEAR_HISTORY_MSG = "Clear all attempt history for this quiz? The quiz itself is kept.";
 %>
 
 <!DOCTYPE html>
@@ -93,6 +94,11 @@
                     <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
                     <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
                 </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                </form>
                 <% } %>
             </div>
         <% } %>
@@ -114,6 +120,11 @@
                 <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
                     <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
                     <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
                 </form>
                 <% } %>
             </div>
@@ -137,6 +148,11 @@
                     <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
                         <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
                         <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                    </form>
+                    &nbsp;|&nbsp;
+                    <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                        <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                        <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
                     </form>
                 </div>
             <% } %>
