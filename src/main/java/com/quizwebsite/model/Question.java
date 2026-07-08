@@ -9,6 +9,7 @@ public abstract class Question {
 	private final String questionText;
 	private final String imageUrl;
 	private int position;
+	private List<Answer> correctAnswers;
 
 	public Question(long id, long quizId, QuestionType type, String questionText, String imageUrl, int position) {
 		this.id = id;
@@ -30,4 +31,7 @@ public abstract class Question {
 	public int getPosition() { return position; }
 
 	public void setPosition(int position) { this.position = position; }
+
+	public List<Answer> getCorrectAnswers() { return correctAnswers; }
+	public void setCorrectAnswers(List<Answer> correctAnswers) { this.correctAnswers = correctAnswers; }
 }
