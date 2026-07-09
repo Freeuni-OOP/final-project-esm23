@@ -14,10 +14,10 @@
     List<Quiz> myQuizzes = (List<Quiz>) request.getAttribute("myQuizzes");
     Map<Long, String> friendNames = (Map<Long, String>) request.getAttribute("friendNames");
     Integer pendingRequestCount = (Integer) request.getAttribute("pendingRequestCount");
-    String REMOVE_USER_MSG = "Remove this user and all their data? This cannot be undone";
+
+
     String REMOVE_QUIZ_MSG = "Remove this quiz? This deletes all its questions and history.";
     String CLEAR_HISTORY_MSG = "Clear all attempt history for this quiz? The quiz itself is kept.";
-    String PROMOTE_USER_MSG = "Grant admin rights to this user?";
 %>
 
 <!DOCTYPE html>
@@ -41,18 +41,7 @@
             <li><a href="announcements">View all announcements</a></li>
             <% if (user.isAdmin()) { %>
                 <li><a href="create-announcement">Post an announcement</a></li>
-                <li>
-                    <form method="post" action="AdminRemoveUserServlet" style="display:inline;">
-                        <input type="text" name="username" placeholder="username to remove" required>
-                        <button type="submit" onclick="return confirm('<%=REMOVE_USER_MSG%>');">Remove user</button>
-                    </form>
-                </li>
-                <li>
-                    <form method="post" action="AdminPromoteUserServlet" style="display:inline;">
-                        <input type="text" name="username" placeholder="username to promote" required>
-                        <button type="submit" onclick="return confirm('<%=PROMOTE_USER_MSG%>');">Promote to Admin</button>
-                    </form>
-                </li>
+                <li><a href="AdminUsersServlet">Users</a></li>
             <% } %>
             <li><a href="LogoutServlet">Log out</a></li>
         </ul>
