@@ -15,6 +15,8 @@ import java.sql.SQLException;
 @WebServlet("/AdminStatsServlet")
 public class AdminStatsServlet extends HttpServlet {
 
+	private static final int DASHBOARD_LIMIT = 5;
+
 	private final UserDAO userDAO = new UserDAO();
 	private final QuizDAO quizDAO = new QuizDAO();
 	private final QuizAttemptDAO quizAttemptDAO = new QuizAttemptDAO();
@@ -28,6 +30,10 @@ public class AdminStatsServlet extends HttpServlet {
 			request.setAttribute("quizCount", quizDAO.countAll());
 			// countAll() matches number of quizzes - no practice quizes
 			request.setAttribute("attemptCount", quizAttemptDAO.countAll());
+
+			// most active users
+			request.setAttribute("topCreators", userDAO.findTopCreators(DASHBOARD_LIMIT));
+			request.setAttribute("topTakers", userDAO.findTopTakers(DASHBOARD_LIMIT));
 
 			request.getRequestDispatcher("/WEB-INF/jsp/adminStats.jsp")
 							.forward(request, response);
