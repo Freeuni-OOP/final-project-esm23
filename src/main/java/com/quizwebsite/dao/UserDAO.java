@@ -146,4 +146,51 @@ public class UserDAO {
 		}
 	}
 
+	// users ranked by number of quizzes they've created
+	public List<UserStats> findTopCreators(int limit) throws SQLException {
+		String sql = """
+				SELECT u.id, u.username, u.is_admin, u.created_at,
+							 COUNT(q.id) AS quizzes_created,
+							 0 AS quizzes_taken
+				FROM users u
+				JOIN quizzes q ON q.creator_id = u.id
+				GROUP BY u.id
+				ORDER BY quizzes_created DESC
+				LIMIT ?
+				""";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, limit);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
+	// users ranked by number of quizzes they've taken
+	public List<UserStats> findTopTakers(int limit) throws SQLException {
+		String sql = """
+				SELECT u.id, u.username, u.is_admin, u.created_at,
+							 0 AS quizzes_created,
+							 COUNT(a.id) AS quizzes_taken
+				FROM users u
+				JOIN quiz_attempts a ON a.user_id = u.id AND a.is_practice = FALSE
+				GROUP BY u.id
+				ORDER BY quizzes_taken DESC
+				LIMIT ?
+				""";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, limit);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
+
 }
