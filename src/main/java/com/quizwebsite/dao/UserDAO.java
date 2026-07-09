@@ -121,4 +121,29 @@ public class UserDAO {
 		);
 	}
 
+	public List<UserStats> findUsersWithStats(String search) throws SQLException {
+		String sql = """
+			SELECT u.id, u.username, u.is_admin, u.created_at,
+					COALESCE(quiz_counts.total, 0) AS quizzes_created,
+					COALESCE(attempt_counts.total, 0) AS quizzes_taken
+			FROM users u
+			LEFT JOIN (SELECT creator_id, COUNT(*) AS total FROM quizzes GROUP BY creator_id) as quiz_counts
+					ON quiz_counts.creator_id = u.id
+			LEFT JOIN (SELECT user_id, COUNT(*) AS total FROM quiz_attempts WHERE is_practice = FALSE GROUP BY user_id) as attempt_counts
+					ON attempt_counts.user_id = u.id
+			WHERE u.is_admin = FALSE AND u.username LIKE ?
+			ORDER BY u.username
+    """;
+
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, "%" + (search == null ? "" : search) + "%");
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
 }
