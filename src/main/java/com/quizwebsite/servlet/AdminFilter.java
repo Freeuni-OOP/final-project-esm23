@@ -19,8 +19,9 @@ import java.io.IOException;
 				"/AdminClearHistoryServlet",
 				"/AdminPromoteUserServlet",
 				"/AdminStatsServlet",
-				"/AdminDeleteAnnouncementServlet",
-				"/create-announcement"
+				"/AdminUsersServlet",
+				"/create-announcement",
+				"/AdminDeleteAnnouncementServlet"
 })
 public class AdminFilter implements Filter {
 
