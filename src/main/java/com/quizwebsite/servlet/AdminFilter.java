@@ -13,7 +13,6 @@ import java.io.IOException;
 // same as AuthFilter.java but for ADMIN checks.
 
 @WebFilter(urlPatterns = {
-				"/AdminDashboardServlet",
 				"/AdminRemoveUserServlet",
 				"/AdminRemoveQuizServlet",
 				"/AdminClearHistoryServlet",
