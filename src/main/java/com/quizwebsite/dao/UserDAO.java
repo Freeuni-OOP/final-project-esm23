@@ -4,6 +4,8 @@ import com.quizwebsite.model.User;
 import com.quizwebsite.util.DBConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,4 +106,19 @@ public class UserDAO {
 			}
 		}
 	}
+
+	// DTO for the admin user dashboard page. User + their activity
+	public record UserStats(long id, String username, boolean isAdmin, LocalDateTime createdAt, int quizzesCreated, int quizzesTaken){}
+
+	private UserStats mapStatsRow(ResultSet rs) throws SQLException {
+		return new UserStats(
+						rs.getLong("id"),
+						rs.getString("username"),
+						rs.getBoolean("is_admin"),
+						rs.getTimestamp("created_at").toLocalDateTime(),
+						rs.getInt("quizzes_created"),
+						rs.getInt("quizzes_taken")
+		);
+	}
+
 }
