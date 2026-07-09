@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 // search/browse regular users with their quiz stats, plus a separate admins-only list
 @WebServlet("/AdminUsersServlet")
@@ -22,11 +23,11 @@ public class AdminUsersServlet extends HttpServlet {
 
 		String search = request.getParameter("q");
 		// lists for filtering
-		ArrayList<UserDAO.UserStats> admins;
-		ArrayList<UserDAO.UserStats> users;
+		ArrayList<UserDAO.UserStats> admins = new ArrayList<>();
+		ArrayList<UserDAO.UserStats> users = new ArrayList<>();
 
 		try {
-			ArrayList<UserDAO.UserStats> allUsers = userDAO.findUsersWithStats(search);
+			List<UserDAO.UserStats> allUsers = userDAO.findUsersWithStats(search);
 
 
 			for (UserDAO.UserStats userStats : allUsers) {
