@@ -82,4 +82,24 @@ public class QuizAttemptDAOTest {
 		dao.insert(new QuizAttempt(userId, quizId, 4, 10, 60, true)); // practice is not counted
 		assertEquals(before + 1, dao.countAll());
 	}
+
+	@Test
+	void testDeleteByQuiz() throws SQLException {
+		dao.insert(new QuizAttempt(userId, quizId, 5, 10, 60, false));
+		dao.insert(new QuizAttempt(userId, quizId, 6, 10, 60, true));
+
+		dao.deleteByQuiz(quizId);
+		assertTrue(dao.findByUserAndQuiz(userId, quizId).isEmpty());
+	}
+
+	@Test
+	void testDeleteByQuizOnlyAffectsGivenQuiz() throws SQLException {
+		long quiz2 = quizDAO.insert(new Quiz(userId, "Quiz 2", null, false, true, false, false));
+		dao.insert(new QuizAttempt(userId, quizId, 5, 10, 60, false));
+		dao.insert(new QuizAttempt(userId, quiz2, 6, 10, 60, false));
+
+		dao.deleteByQuiz(quizId);
+		assertTrue(dao.findByUserAndQuiz(userId, quizId).isEmpty());
+		assertEquals(1, dao.findByUserAndQuiz(userId, quiz2).size());
+	}
 }
