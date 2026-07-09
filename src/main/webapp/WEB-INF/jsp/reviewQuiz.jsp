@@ -1,46 +1,136 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.quizwebsite.model.*" %>
+<%@ page import="com.quizwebsite.model.User" %>
+<%@ page import="com.quizwebsite.service.AnswerReviewRow" %>
 <%@ page import="java.util.List" %>
 <%
-    Quiz quiz = (Quiz) request.getAttribute("quiz");
-    List<Question> questions = (List<Question>) request.getAttribute("questions");
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
 
-    //safety check to redirect if accessed outside servlet flow
-    if (quiz == null) {
+    User user = (User) session.getAttribute("user");
+    Quiz quiz = (Quiz) request.getAttribute("quiz");
+    Question question = (Question) request.getAttribute("question");
+
+    if (quiz == null || question == null) {
         response.sendRedirect("index.jsp");
         return;
     }
+
+    int questionNumber = (Integer) request.getAttribute("questionNumber");
+    int totalQuestions = (Integer) request.getAttribute("totalQuestions");
+    boolean isLastQuestion = (Boolean) request.getAttribute("isLastQuestion");
+    AnswerReviewRow feedback = (AnswerReviewRow) request.getAttribute("feedback");
+    boolean isPractice = Boolean.TRUE.equals(session.getAttribute("takeQuiz_isPractice"));
 %>
 <!DOCTYPE html>
-<html>
-<head><title><%= quiz.getTitle() %></title></head>
-<body>
-<h1><%= quiz.getTitle() %></h1>
-<p><%= quiz.getDescription() %></p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= quiz.getTitle() %> &mdash; Question <%= questionNumber %> — Quiz Website</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body class="site-wrapper">
 
-<h3>Questions (<%= questions.size() %>)</h3>
+<nav class="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="index.jsp">&#9670; Quiz Website</a>
+        <span class="navbar-spacer"></span>
+        <ul class="navbar-nav">
+            <li><a href="index.jsp">Home</a></li>
+            <li><a href="LogoutServlet">Log Out</a></li>
+        </ul>
+        <div class="navbar-user">Welcome, <strong><%= user.getUsername() %></strong></div>
+    </div>
+</nav>
 
-<% for (Question q : questions) { %>
-<div style="margin-bottom:15px;">
-    <p><strong><%= q.getQuestionText() %></strong></p>
-    <% if (q instanceof MultipleChoice) {
-        MultipleChoice mc = (MultipleChoice) q;
-    %>
-    <ul>
-        <% for (QuestionOption opt : mc.getOptions()) { %>
-        <li<%= opt.isCorrect() ? " style=\"color:green;font-weight:bold;\"" : "" %>>
-            <%= opt.getOptionText() %><%= opt.isCorrect() ? " (correct)" : "" %>
-        </li>
+<div class="main-content">
+    <div class="container">
+
+        <div class="quiz-header">
+            <div>
+                <h1><%= quiz.getTitle() %></h1>
+                <span class="quiz-progress">Question <%= questionNumber %> of <%= totalQuestions %></span>
+            </div>
+            <%-- Timer is managed server-side; just show progress --%>
+        </div>
+
+        <% if (isPractice) { %>
+        <div class="practice-banner">&#128218; Practice mode &mdash; this attempt will not be scored or saved.</div>
         <% } %>
-    </ul>
-    <% } else { %>
-        <% for (Answer a : q.getCorrectAnswers()) { %>
-        <p style="color:green;font-weight:bold;"><%= a.getAnswerText() %> (correct)</p>
+
+        <% if (feedback != null) { %>
+        <%-- ---- Immediate-correction result ---- --%>
+        <div class="question-card">
+            <p class="question-text"><%= question.getQuestionText() %></p>
+
+            <div class="<%= feedback.isCorrect() ? "feedback-correct" : "feedback-incorrect" %>">
+                <div class="feedback-verdict"><%= feedback.isCorrect() ? "&#10003; Correct!" : "&#10007; Incorrect" %></div>
+                <p class="feedback-answer-row">Your answer: <code><%= feedback.getUserResponse() %></code></p>
+                <% if (!feedback.isCorrect()) { %>
+                <p class="feedback-answer-row" style="color:var(--success);">
+                    Correct answer: <strong><%= feedback.getCorrectAnswerText() %></strong>
+                </p>
+                <% } %>
+            </div>
+
+            <form method="get" action="TakeQuizServlet">
+                <input type="hidden" name="action" value="<%= isLastQuestion ? "finish" : "next" %>">
+                <button class="btn <%= isLastQuestion ? "btn-success" : "btn-primary" %>" type="submit">
+                    <%= isLastQuestion ? "See Results" : "Continue &rarr;" %>
+                </button>
+            </form>
+        </div>
+
+        <% } else { %>
+        <%-- ---- Standard question input ---- --%>
+        <div class="question-card">
+            <div class="question-label">Question <%= questionNumber %> of <%= totalQuestions %></div>
+            <p class="question-text"><%= question.getQuestionText() %></p>
+
+            <% if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) { %>
+            <img class="question-image" src="<%= question.getImageUrl() %>" alt="question image">
+            <% } %>
+
+            <form method="post" action="TakeQuizServlet">
+                <% if (question instanceof MultipleChoice) {
+                    MultipleChoice mc = (MultipleChoice) question;
+                    if (mc.getOptions() != null) { %>
+                <div class="mc-options" style="margin-bottom:1rem;">
+                    <% for (QuestionOption opt : mc.getOptions()) { %>
+                    <label class="mc-option">
+                        <input type="radio" name="response" value="<%= opt.getOptionText() %>" required>
+                        <%= opt.getOptionText() %>
+                    </label>
+                    <% } %>
+                </div>
+                <%     }
+                } else { %>
+                <div class="form-group">
+                    <input class="form-control text-answer-input" type="text"
+                           name="response" required autofocus placeholder="Your answer&hellip;">
+                </div>
+                <% } %>
+
+                <div class="form-actions">
+                    <button class="btn <%= isLastQuestion ? "btn-success" : "btn-primary" %>" type="submit">
+                        <%= isLastQuestion ? "&#10003; Submit Quiz" : "Next &rarr;" %>
+                    </button>
+                </div>
+            </form>
+        </div>
         <% } %>
-    <% } %>
+
+    </div>
 </div>
-<% } %>
 
-<p><a href="index.jsp">Back to Home</a></p>
+<footer class="site-footer">
+    <div class="container">&copy; 2025 Quiz Website</div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

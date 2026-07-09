@@ -8,6 +8,7 @@
         return;
     }
 
+    User user = (User) session.getAttribute("user");
     Quiz quiz = (Quiz) request.getAttribute("quiz");
     Question question = (Question) request.getAttribute("question");
 
@@ -23,61 +24,100 @@
     AnswerReviewRow feedback = (AnswerReviewRow) request.getAttribute("feedback");
 %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= quiz.getTitle() %> &mdash; Question <%= questionNumber %></title>
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
-<h1><%= quiz.getTitle() %></h1>
-<p>Question <%= questionNumber %> of <%= totalQuestions %></p>
+<body class="site-wrapper">
 
-<%-- Type-safe practice mode flag assessment --%>
-<% if (Boolean.TRUE.equals(session.getAttribute("takeQuiz_isPractice"))) { %>
-    <p><em>Practice mode &mdash; this attempt will not be scored or saved.</em></p>
-<% } %>
-
-<% if (feedback != null) { %>
-    <%-- immediate-correction result view block --%>
-    <div style="margin:15px 0; padding:10px; border:1px solid <%= feedback.isCorrect() ? "#2e7d32" : "#c62828" %>; background-color: <%= feedback.isCorrect() ? "#e8f5e9" : "#ffebee" %>;">
-        <p><strong><%= feedback.isCorrect() ? "Correct!" : "Incorrect." %></strong></p>
-        <p>Your answer: <code><%= feedback.getUserResponse() %></code></p>
-        <% if (!feedback.isCorrect()) { %>
-            <p>Correct answer: <strong><%= feedback.getCorrectAnswerText() %></strong></p>
-        <% } %>
+<nav class="navbar">
+    <div class="container">
+        <a class="navbar-brand" href="index.jsp">&#9670; Quiz Website</a>
+        <span class="navbar-spacer"></span>
+        <ul class="navbar-nav">
+            <li><a href="index.jsp">Home</a></li>
+            <li><a href="LogoutServlet">Log Out</a></li>
+        </ul>
+        <div class="navbar-user">Welcome, <strong><%= user.getUsername() %></strong></div>
     </div>
-    <form method="get" action="TakeQuizServlet">
-        <input type="hidden" name="action" value="<%= isLastQuestion ? "finish" : "next" %>">
-        <button type="submit"><%= isLastQuestion ? "See Results" : "Continue" %></button>
-    </form>
+</nav>
 
-<% } else { %>
-    <%-- Standard question input presentation view block --%>
-    <div style="margin-bottom:20px;">
-        <p><strong><%= question.getQuestionText() %></strong></p>
+<div class="main-content">
+    <div class="container">
 
-        <% if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) { %>
-            <p><img src="<%= question.getImageUrl() %>" alt="question image" style="max-width:300px; border:1px solid #ddd;"></p>
-        <% } %>
-
-        <form method="post" action="TakeQuizServlet">
-            <% if (question instanceof MultipleChoice) {
-                   MultipleChoice mc = (MultipleChoice) question;
-                   if (mc.getOptions() != null) {
-                       for (QuestionOption opt : mc.getOptions()) { %>
-                        <label>
-                            <input type="radio" name="response" value="<%= opt.getOptionText() %>" required>
-                            <%= opt.getOptionText() %>
-                        </label><br>
-            <%         }
-                   }
-               } else { %>
-                <%-- Added 'required' attribute to avoid accidental empty un-tracked submissions --%>
-                <input type="text" name="response" size="40" required autofocus>
+        <div class="quiz-header">
+            <h1><%= quiz.getTitle() %></h1>
+            <p class="quiz-progress">Question <%= questionNumber %> of <%= totalQuestions %></p>
+            <%-- Type-safe practice mode flag assessment --%>
+            <% if (Boolean.TRUE.equals(session.getAttribute("takeQuiz_isPractice"))) { %>
+                <p class="quiz-progress"><em>Practice mode &mdash; this attempt will not be scored or saved.</em></p>
             <% } %>
-            <br><br>
-            <button type="submit"><%= isLastQuestion ? "Submit Quiz" : "Next" %></button>
-        </form>
+        </div>
+
+        <div class="question-card">
+            <p class="question-label">QUESTION <%= questionNumber %> OF <%= totalQuestions %></p>
+
+            <% if (feedback != null) { %>
+                <%-- immediate-correction result view block --%>
+                <div class="<%= feedback.isCorrect() ? "feedback-correct" : "feedback-incorrect" %>">
+                    <p class="feedback-verdict"><%= feedback.isCorrect() ? "Correct!" : "Incorrect." %></p>
+                    <p class="feedback-answer-row">Your answer: <code><%= feedback.getUserResponse() %></code></p>
+                    <% if (!feedback.isCorrect()) { %>
+                        <p class="feedback-answer-row">Correct answer: <strong><%= feedback.getCorrectAnswerText() %></strong></p>
+                    <% } %>
+                </div>
+                <div style="margin-top:1rem;">
+                    <form method="get" action="TakeQuizServlet">
+                        <input type="hidden" name="action" value="<%= isLastQuestion ? "finish" : "next" %>">
+                        <button class="btn btn-primary" type="submit"><%= isLastQuestion ? "See Results" : "Continue &rarr;" %></button>
+                    </form>
+                </div>
+
+            <% } else { %>
+                <%-- Standard question input presentation view block --%>
+                <p class="question-text"><%= question.getQuestionText() %></p>
+
+                <% if (question.getImageUrl() != null && !question.getImageUrl().isEmpty()) { %>
+                    <img class="question-image" src="<%= question.getImageUrl() %>" alt="question image">
+                <% } %>
+
+                <form method="post" action="TakeQuizServlet">
+                    <% if (question instanceof MultipleChoice) {
+                           MultipleChoice mc = (MultipleChoice) question;
+                           if (mc.getOptions() != null) {
+                               for (QuestionOption opt : mc.getOptions()) { %>
+                                <div class="mc-options">
+                                    <label class="mc-option">
+                                        <input type="radio" name="response" value="<%= opt.getOptionText() %>" required>
+                                        <%= opt.getOptionText() %>
+                                    </label>
+                                </div>
+                    <%         }
+                           }
+                       } else { %>
+                        <%-- Added 'required' attribute to avoid accidental empty un-tracked submissions --%>
+                        <input class="text-answer-input" type="text" name="response" placeholder="Your answer..." required autofocus>
+                    <% } %>
+                    <div style="margin-top:1.5rem;">
+                        <button class="btn <%= isLastQuestion ? "btn-success" : "btn-primary" %>" type="submit">
+                            <%= isLastQuestion ? "&#10003; Submit Quiz" : "Next &rarr;" %>
+                        </button>
+                    </div>
+                </form>
+            <% } %>
+        </div>
+
     </div>
-<% } %>
+</div>
+
+<footer class="site-footer">
+    <div class="container">&copy; 2025 Quiz Website</div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
