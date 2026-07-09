@@ -14,6 +14,10 @@
     List<Quiz> myQuizzes = (List<Quiz>) request.getAttribute("myQuizzes");
     Map<Long, String> friendNames = (Map<Long, String>) request.getAttribute("friendNames");
     Integer pendingRequestCount = (Integer) request.getAttribute("pendingRequestCount");
+
+
+    String REMOVE_QUIZ_MSG = "Remove this quiz? This deletes all its questions and history.";
+    String CLEAR_HISTORY_MSG = "Clear all attempt history for this quiz? The quiz itself is kept.";
 %>
 
 <!DOCTYPE html>
@@ -37,6 +41,7 @@
             <li><a href="announcements">View all announcements</a></li>
             <% if (user.isAdmin()) { %>
                 <li><a href="create-announcement">Post an announcement</a></li>
+                <li><a href="AdminUsersServlet">Users</a></li>
             <% } %>
             <li><a href="LogoutServlet">Log out</a></li>
         </ul>
@@ -79,6 +84,18 @@
                     &nbsp;|&nbsp;
                     <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>&practice=true">Practice mode</a>
                 <% } %>
+                <% if (user != null && user.isAdmin()) { %>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                </form>
+                <% } %>
             </div>
         <% } %>
     <% } %>
@@ -94,6 +111,18 @@
             <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
                 <p><strong><%= quiz.getTitle() %></strong></p>
                 <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Take this quiz</a>
+                <% if (user != null && user.isAdmin()) { %>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                </form>
+                <% } %>
             </div>
         <% } %>
     <% } %>
@@ -111,11 +140,21 @@
                 <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
                     <p><strong><%= quiz.getTitle() %></strong></p>
                     <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Preview / take</a>
+
+                    <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                        <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                        <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                    </form>
+                    &nbsp;|&nbsp;
+                    <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                        <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                        <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                    </form>
                 </div>
             <% } %>
         <% } %>
 
-        <hr>
+<hr>
 
         <%-- Friends Feed --%>
         <h2>Friends</h2>
@@ -132,6 +171,12 @@
                 <% } %>
             </ul>
         <% } %>
+    <% } %>
+
+    <%-- Admin stats panel--%>
+    <% if (user != null && user.isAdmin()) { %>
+        <a href="AdminStatsServlet">View site statistics</a>
+        <br/>
     <% } %>
 
 </body>

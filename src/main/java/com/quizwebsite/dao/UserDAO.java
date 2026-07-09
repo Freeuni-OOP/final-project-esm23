@@ -4,6 +4,8 @@ import com.quizwebsite.model.User;
 import com.quizwebsite.util.DBConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,4 +106,91 @@ public class UserDAO {
 			}
 		}
 	}
+
+	// DTO for the admin user dashboard page. User + their activity
+	public record UserStats(long id, String username, boolean isAdmin, LocalDateTime createdAt, int quizzesCreated, int quizzesTaken){}
+
+	private UserStats mapStatsRow(ResultSet rs) throws SQLException {
+		return new UserStats(
+						rs.getLong("id"),
+						rs.getString("username"),
+						rs.getBoolean("is_admin"),
+						rs.getTimestamp("created_at").toLocalDateTime(),
+						rs.getInt("quizzes_created"),
+						rs.getInt("quizzes_taken")
+		);
+	}
+
+	public List<UserStats> findUsersWithStats(String search) throws SQLException {
+		String sql = """
+			SELECT u.id, u.username, u.is_admin, u.created_at,
+					COALESCE(quiz_counts.total, 0) AS quizzes_created,
+					COALESCE(attempt_counts.total, 0) AS quizzes_taken
+			FROM users u
+			LEFT JOIN (SELECT creator_id, COUNT(*) AS total FROM quizzes GROUP BY creator_id) as quiz_counts
+					ON quiz_counts.creator_id = u.id
+			LEFT JOIN (SELECT user_id, COUNT(*) AS total FROM quiz_attempts WHERE is_practice = FALSE GROUP BY user_id) as attempt_counts
+					ON attempt_counts.user_id = u.id
+			WHERE u.username LIKE ?
+			ORDER BY u.username
+    """;
+
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, "%" + (search == null ? "" : search) + "%");
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
+	// users ranked by number of quizzes they've created
+	public List<UserStats> findTopCreators(int limit) throws SQLException {
+		String sql = """
+				SELECT u.id, u.username, u.is_admin, u.created_at,
+							 COUNT(q.id) AS quizzes_created,
+							 0 AS quizzes_taken
+				FROM users u
+				JOIN quizzes q ON q.creator_id = u.id
+				GROUP BY u.id
+				ORDER BY quizzes_created DESC
+				LIMIT ?
+				""";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, limit);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
+	// users ranked by number of quizzes they've taken
+	public List<UserStats> findTopTakers(int limit) throws SQLException {
+		String sql = """
+				SELECT u.id, u.username, u.is_admin, u.created_at,
+							 0 AS quizzes_created,
+							 COUNT(a.id) AS quizzes_taken
+				FROM users u
+				JOIN quiz_attempts a ON a.user_id = u.id AND a.is_practice = FALSE
+				GROUP BY u.id
+				ORDER BY quizzes_taken DESC
+				LIMIT ?
+				""";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setInt(1, limit);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<UserStats> list = new ArrayList<>();
+				while (rs.next()) list.add(mapStatsRow(rs));
+				return list;
+			}
+		}
+	}
+
+
 }
