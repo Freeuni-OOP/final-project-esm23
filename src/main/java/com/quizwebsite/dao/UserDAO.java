@@ -131,7 +131,7 @@ public class UserDAO {
 					ON quiz_counts.creator_id = u.id
 			LEFT JOIN (SELECT user_id, COUNT(*) AS total FROM quiz_attempts WHERE is_practice = FALSE GROUP BY user_id) as attempt_counts
 					ON attempt_counts.user_id = u.id
-			WHERE u.is_admin = FALSE AND u.username LIKE ?
+			WHERE u.username LIKE ?
 			ORDER BY u.username
     """;
 
