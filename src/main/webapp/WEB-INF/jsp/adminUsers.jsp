@@ -69,6 +69,7 @@
                 <button type="submit" onclick="return confirm('<%=PROMOTE_USER_MSG%>');">Promote to Admin</button>
             </form>
             <form method="post" action="AdminRemoveUserServlet" style="display:inline;">
+                <input type="hidden" name="username" value="<%= u.username() %>">
                 <button type="submit" onclick="return confirm('<%=REMOVE_USER_MSG%>');">Remove user</button>
             </form>
             <% } %>
