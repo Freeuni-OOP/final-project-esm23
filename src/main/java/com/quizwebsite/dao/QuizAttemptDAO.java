@@ -103,4 +103,13 @@ public class QuizAttemptDAO {
 			return rs.getInt(1);
 		}
 	}
+	// admin: wipe all attempt history for a quiz
+	public void deleteByQuiz(long quizId) throws SQLException {
+		String sql = "DELETE FROM quiz_attempts WHERE quiz_id = ?";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setLong(1, quizId);
+			ps.executeUpdate();
+		}
+	}
 }

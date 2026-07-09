@@ -11,9 +11,13 @@
     List<Quiz> recentQuizzes  = (List<Quiz>) request.getAttribute("recentQuizzes");
     List<Quiz> popularQuizzes = (List<Quiz>) request.getAttribute("popularQuizzes");
     List<Announcement> announcements = (List<Announcement>) request.getAttribute("announcements");
-    List<Quiz> myQuizzes      = (List<Quiz>) request.getAttribute("myQuizzes");
-    Map<Long, String> friendNames    = (Map<Long, String>) request.getAttribute("friendNames");
-    Integer pendingRequestCount      = (Integer) request.getAttribute("pendingRequestCount");
+    List<Quiz> myQuizzes = (List<Quiz>) request.getAttribute("myQuizzes");
+    Map<Long, String> friendNames = (Map<Long, String>) request.getAttribute("friendNames");
+    Integer pendingRequestCount = (Integer) request.getAttribute("pendingRequestCount");
+
+
+    String REMOVE_QUIZ_MSG = "Remove this quiz? This deletes all its questions and history.";
+    String CLEAR_HISTORY_MSG = "Clear all attempt history for this quiz? The quiz itself is kept.";
 %>
 
 <!DOCTYPE html>
@@ -39,9 +43,8 @@
             <li><a href="CreateQuizServlet">+ Create Quiz</a></li>
             <li><a href="announcements">Announcements</a></li>
             <% if (user.isAdmin()) { %>
-            <li><a href="create-announcement">&#128226; Post</a></li>
-            <% } %>
-            <li><a href="LogoutServlet">Log Out</a></li>
+                <li><a href="create-announcement">Post an announcement</a></li>
+                <li><a href="AdminUsersServlet">Users</a></li>
             <% } %>
         </ul>
         <% if (user != null) { %>
@@ -118,84 +121,88 @@
                     <% } %>
                 </div>
                 <% } %>
-
-                <hr class="divider">
-
-                <%-- Popular Quizzes --%>
-                <h2 class="section-title">&#128293; Popular Quizzes</h2>
-                <% if (popularQuizzes == null || popularQuizzes.isEmpty()) { %>
-                <div class="empty-state"><p>No quizzes have been attempted yet.</p></div>
-                <% } else { %>
-                <div class="quiz-grid">
-                    <% for (Quiz quiz : popularQuizzes) { %>
-                    <div class="card">
-                        <div class="card-title"><%= quiz.getTitle() %></div>
-                        <div class="card-actions">
-                            <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>" class="btn btn-primary btn-sm">Take Quiz</a>
-                        </div>
-                    </div>
-                    <% } %>
-                </div>
+                <% if (user != null && user.isAdmin()) { %>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                </form>
                 <% } %>
-
-                <%-- User-specific: Your Quizzes --%>
-                <% if (user != null) { %>
-                <hr class="divider">
-                <h2 class="section-title">&#128221; Your Quizzes</h2>
-                <% if (myQuizzes == null || myQuizzes.isEmpty()) { %>
-                <div class="empty-state">
-                    <p>You haven't created any quizzes yet.</p>
-                    <a href="CreateQuizServlet" class="btn btn-primary btn-sm">Create one now</a>
-                </div>
-                <% } else { %>
-                <div class="quiz-grid">
-                    <% for (Quiz quiz : myQuizzes) { %>
-                    <div class="card">
-                        <div class="card-title"><%= quiz.getTitle() %></div>
-                        <div class="card-actions">
-                            <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>" class="btn btn-secondary btn-sm">Preview</a>
-                            <a href="ReviewQuizServlet?quizId=<%= quiz.getId() %>" class="btn btn-outline btn-sm">Review</a>
-                        </div>
-                    </div>
-                    <% } %>
-                </div>
-                <% } %>
-                <% } %>
-
             </div>
+        <% } %>
+    <% } %>
 
-            <%-- ---- Sidebar ---- --%>
-            <% if (user != null) { %>
-            <aside>
-                <div class="sidebar-card">
-                    <h3>&#128101; Friends</h3>
-                    <% if (pendingRequestCount != null && pendingRequestCount > 0) { %>
-                    <div class="alert alert-info" style="margin-bottom:.75rem;padding:.5rem .75rem;font-size:.82rem;">
-                        <%= pendingRequestCount %> pending friend request<%= pendingRequestCount == 1 ? "" : "s" %>
-                    </div>
-                    <% } %>
-                    <% if (friendNames == null || friendNames.isEmpty()) { %>
-                    <p class="text-muted text-small">No friends added yet.</p>
-                    <% } else { %>
-                    <ul class="friends-list">
-                        <% for (String friendName : friendNames.values()) { %>
-                        <li><%= friendName %></li>
-                        <% } %>
-                    </ul>
-                    <% } %>
+    <hr>
+
+    <%-- ==================== Popular Quizzes ==================== --%>
+    <h2>Popular Quizzes</h2>
+    <% if (popularQuizzes == null || popularQuizzes.isEmpty()) { %>
+        <p>No quizzes have been attempted yet.</p>
+    <% } else { %>
+        <% for (Quiz quiz : popularQuizzes) { %>
+            <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
+                <p><strong><%= quiz.getTitle() %></strong></p>
+                <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Take this quiz</a>
+                <% if (user != null && user.isAdmin()) { %>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                </form>
+                &nbsp;|&nbsp;
+                <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                    <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                    <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                </form>
+                <% } %>
+            </div>
+        <% } %>
+    <% } %>
+
+    <%-- ==================== User-Specific Dashboard ==================== --%>
+    <% if (user != null) { %>
+        <hr>
+
+        <%-- Your Quizzes --%>
+        <h2>Your Quizzes</h2>
+        <% if (myQuizzes == null || myQuizzes.isEmpty()) { %>
+            <p>You haven't created any quizzes yet. <a href="CreateQuizServlet">Create one now</a>.</p>
+        <% } else { %>
+            <% for (Quiz quiz : myQuizzes) { %>
+                <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
+                    <p><strong><%= quiz.getTitle() %></strong></p>
+                    <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Preview / take</a>
+
+                    <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
+                        <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                        <button type="submit" onclick="return confirm('<%=REMOVE_QUIZ_MSG%>');">Remove quiz</button>
+                    </form>
+                    &nbsp;|&nbsp;
+                    <form method="post" action="AdminClearHistoryServlet" style="display:inline;">
+                        <input type="hidden" name="quizId" value="<%= quiz.getId() %>">
+                        <button type="submit" onclick="return confirm('<%=CLEAR_HISTORY_MSG%>');">Clear history</button>
+                    </form>
                 </div>
             </aside>
             <% } %>
         </div>
 
-    </div>
-</div>
+<hr>
 
 <footer class="site-footer">
     <div class="container">&copy; 2025 Quiz Website</div>
 </footer>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="js/main.js"></script>
+    <%-- Admin stats panel--%>
+    <% if (user != null && user.isAdmin()) { %>
+        <a href="AdminStatsServlet">View site statistics</a>
+        <br/>
+    <% } %>
+
 </body>
 </html>
