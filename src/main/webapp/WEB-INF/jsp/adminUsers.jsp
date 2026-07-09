@@ -5,6 +5,9 @@
 <%-- Lets admins search users and promote them to admin --%>
 
 <%
+    String PROMOTE_USER_MSG = "Grant admin rights to this user?";
+    String REMOVE_USER_MSG = "Remove this user and all their data? This cannot be undone";
+
     List<UserStats> users = (List<UserStats>) request.getAttribute("users");
     String searchQuery = (String) request.getAttribute("searchQuery");
     if (searchQuery == null) {
@@ -63,7 +66,10 @@
             <% if (!u.isAdmin()) { %>
             <form method="post" action="AdminPromoteUserServlet" style="display:inline;">
                 <input type="hidden" name="username" value="<%= u.username() %>">
-                <button type="submit" onclick="return confirm('Grant admin rights to this user?');">Promote to Admin</button>
+                <button type="submit" onclick="return confirm('<%=PROMOTE_USER_MSG%>');">Promote to Admin</button>
+            </form>
+            <form method="post" action="AdminRemoveUserServlet" style="display:inline;">
+                <button type="submit" onclick="return confirm('<%=REMOVE_USER_MSG%>');">Remove user</button>
             </form>
             <% } %>
         </td>
