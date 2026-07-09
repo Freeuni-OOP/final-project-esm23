@@ -1,6 +1,6 @@
 <%@ page import="java.util.List" %>
 <%@ page import="com.quizwebsite.dao.UserDAO.UserStats" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8"%>
 
 <%
     List<UserStats> topCreators = (List<UserStats>) request.getAttribute("topCreators");
