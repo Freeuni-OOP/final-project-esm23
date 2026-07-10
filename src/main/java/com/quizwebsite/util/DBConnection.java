@@ -12,6 +12,11 @@ public class DBConnection {
 	private static final Properties props = new Properties();
 
 	static {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException("MySQL driver not found", e);
+		}
 		try (InputStream in = DBConnection.class
 						.getClassLoader()
 						.getResourceAsStream("db.properties")) {
