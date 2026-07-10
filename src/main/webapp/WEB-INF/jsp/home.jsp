@@ -44,6 +44,7 @@
                 <li><a href="AdminUsersServlet">Users</a></li>
             <% } %>
             <li><a href="LogoutServlet">Log out</a></li>
+            <li><a href="FriendsServlet">Friends<% if (pendingRequestCount != null && pendingRequestCount > 0) { %> (<%= pendingRequestCount %> pending)<% } %></a></li>
         </ul>
     <% } %>
 
