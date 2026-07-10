@@ -17,12 +17,14 @@ import java.io.IOException;
 // re-implementing the check in the servlet itself.
 
 
-@WebFilter(urlPatterns = {"/CreateQuizServlet", "/AddQuestionServlet", "/TakeQuizServlet", "/ReviewQuizServlet"})
+@WebFilter(urlPatterns = {"/CreateQuizServlet", "/AddQuestionServlet", "/TakeQuizServlet", "/ReviewQuizServlet",
+		"/SendFriendRequestServlet", "/RespondFriendRequestServlet", "/RemoveFriendServlet",
+		"/FriendRequestsServlet", "/FindFriendsServlet"})
 public class AuthFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-					throws IOException, ServletException {
+			throws IOException, ServletException {
 
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
