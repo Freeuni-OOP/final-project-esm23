@@ -27,10 +27,17 @@ public class FillBlankTest {
 	}
 
 	@Test
-	public void testCheckAnswer() {
-		assertTrue(q.checkAnswer("Paris", answers));
-		assertTrue(q.checkAnswer("paris", answers));
-		assertTrue(q.checkAnswer("  Paris  ", answers));
-		assertFalse(q.checkAnswer("Tbilisi", answers));
+	public void testGrade() {
+		assertEquals(1, q.grade(List.of("Paris"), answers));
+		assertEquals(1, q.grade(List.of("paris"), answers));
+		assertEquals(1, q.grade(List.of("  Paris  "), answers));
+		assertEquals(0, q.grade(List.of("Tbilisi"), answers));
+	}
+
+	@Test
+	public void testSetAndGetCorrectAnswers() {
+		q.setCorrectAnswers(answers);
+		assertEquals(1, q.getCorrectAnswers().size());
+		assertEquals("Paris", q.getCorrectAnswers().getFirst().getAnswerText());
 	}
 }

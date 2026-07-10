@@ -9,6 +9,7 @@ public abstract class Question {
 	private final String questionText;
 	private final String imageUrl;
 	private int position;
+	private List<Answer> correctAnswers;
 
 	public Question(long id, long quizId, QuestionType type, String questionText, String imageUrl, int position) {
 		this.id = id;
@@ -19,7 +20,8 @@ public abstract class Question {
 		this.position = position;
 	}
 
-	public abstract boolean checkAnswer(String userInput, List<Answer> correctAnswers);
+	public abstract int grade(List<String> responses, List<Answer> correctAnswers);
+	public abstract int maxPoints(List<Answer> correctAnswers); // how much each question is worth
 
 	public long getId() { return id; }
 	public long getQuizId() { return quizId; }
@@ -29,4 +31,7 @@ public abstract class Question {
 	public int getPosition() { return position; }
 
 	public void setPosition(int position) { this.position = position; }
+
+	public List<Answer> getCorrectAnswers() { return correctAnswers; }
+	public void setCorrectAnswers(List<Answer> correctAnswers) { this.correctAnswers = correctAnswers; }
 }

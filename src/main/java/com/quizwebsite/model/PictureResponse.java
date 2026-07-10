@@ -9,14 +9,14 @@ public class PictureResponse extends Question {
 	}
 
 	@Override
-	public boolean checkAnswer(String userInput, List<Answer> correctAnswers) {
-		if (userInput == null || correctAnswers == null) return false;
-		String normalized = userInput.trim().toLowerCase();
-		for (Answer answer : correctAnswers) {
-			if (answer.getAnswerText().trim().toLowerCase().equals(normalized)) {
-				return true;
-			}
+	public int grade(List<String> responses, List<Answer> correctAnswers) {
+		if (responses == null || responses.isEmpty() || correctAnswers == null) return 0;
+		String input = responses.get(0).trim().toLowerCase();
+		for (Answer a : correctAnswers) {
+			if (a.getAnswerText().trim().toLowerCase().equals(input)) return 1;
 		}
-		return false;
+		return 0;
 	}
+	@Override
+	public int maxPoints(List<Answer> correctAnswers) { return 1; }
 }
