@@ -21,6 +21,7 @@
     List<FriendView> friends = asFriendViewList(request.getAttribute("friends"));
     List<FriendView> pendingRequests = asFriendViewList(request.getAttribute("pendingRequests"));
     List<FriendView> searchResults = asFriendViewList(request.getAttribute("searchResults"));
+    List<FriendView> sentRequests = asFriendViewList(request.getAttribute("sentRequests"));
 
     String error = (String) request.getAttribute("error");
     String contextPath = request.getContextPath();
@@ -71,6 +72,30 @@
 <% } %>
 
 <hr>
+
+<h2>Sent requests</h2>
+
+<% if (sentRequests == null || sentRequests.isEmpty()) { %>
+<p>You have no pending sent requests.</p>
+<% } else { %>
+<ul>
+    <% for (FriendView sent : sentRequests) { %>
+    <li>
+        <%= esc(sent.username()) %>
+
+        <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
+            <input type="hidden" name="requesterId" value="<%= sent.id() %>">
+            <input type="hidden" name="action" value="remove">
+            <button type="submit">Cancel</button>
+        </form>
+    </li>
+    <% } %>
+</ul>
+<% } %>
+
+<hr>
+
+
 
 <h2>Your friends</h2>
 
