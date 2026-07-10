@@ -14,6 +14,7 @@
     List<Quiz> myQuizzes = (List<Quiz>) request.getAttribute("myQuizzes");
     Map<Long, String> friendNames = (Map<Long, String>) request.getAttribute("friendNames");
     Integer pendingRequestCount = (Integer) request.getAttribute("pendingRequestCount");
+    Map<Long, String> creatorNames = (Map<Long, String>) request.getAttribute("creatorNames");
 
 
     String REMOVE_QUIZ_MSG = "Remove this quiz? This deletes all its questions and history.";
@@ -79,6 +80,7 @@
         <% for (Quiz quiz : recentQuizzes) { %>
             <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
                 <p><strong><%= quiz.getTitle() %></strong></p>
+                <span style="float:right;">by <a href="UserProfileServlet?id=<%= quiz.getCreatorId() %>"><%= creatorNames.get(quiz.getCreatorId()) %></a></span>
                 <p><%= quiz.getDescription() == null ? "" : quiz.getDescription() %></p>
                 <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Take this quiz</a>
                 <% if (quiz.isPracticeEnabled()) { %>
@@ -111,6 +113,7 @@
         <% for (Quiz quiz : popularQuizzes) { %>
             <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
                 <p><strong><%= quiz.getTitle() %></strong></p>
+                <span style="float:right;">by <a href="UserProfileServlet?id=<%= quiz.getCreatorId() %>"><%= creatorNames.get(quiz.getCreatorId()) %></a></span>
                 <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Take this quiz</a>
                 <% if (user != null && user.isAdmin()) { %>
                 &nbsp;|&nbsp;
@@ -140,6 +143,7 @@
             <% for (Quiz quiz : myQuizzes) { %>
                 <div style="margin-bottom:10px; padding:8px; border:1px solid #ccc;">
                     <p><strong><%= quiz.getTitle() %></strong></p>
+                    <span style="float:right;">by <a href="UserProfileServlet?id=<%= quiz.getCreatorId() %>"><%= creatorNames.get(quiz.getCreatorId()) %></a></span>
                     <a href="TakeQuizServlet?quizId=<%= quiz.getId() %>">Preview / take</a>
 
                     <form method="post" action="AdminRemoveQuizServlet" style="display:inline;">
@@ -167,8 +171,8 @@
             <p>You don't have any friends added yet.</p>
         <% } else { %>
             <ul>
-                <% for (String friendName : friendNames.values()) { %>
-                    <li><%= friendName %></li>
+                <% for (Map.Entry<Long, String> friendEntry : friendNames.entrySet()) { %>
+                    <li><a href="UserProfileServlet?id=<%= friendEntry.getKey() %>"><%= friendEntry.getValue() %></a></li>
                 <% } %>
             </ul>
         <% } %>
