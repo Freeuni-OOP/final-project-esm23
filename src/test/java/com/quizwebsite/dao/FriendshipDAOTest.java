@@ -70,4 +70,18 @@ public class FriendshipDAOTest {
 		dao.insert(new Friendship(alice, bob));
 		assertEquals(1, dao.findPendingReceived(bob).size());
 	}
+
+	@Test
+	public void testFindPendingSent() throws SQLException {
+		dao.insert(new Friendship(alice, bob));
+		assertEquals(1, dao.findPendingSent(alice).size());
+		assertTrue(dao.findPendingSent(bob).isEmpty()); // bob received it, didn't send it
+	}
+
+	@Test
+	public void testFindPendingSentExcludesAccepted() throws SQLException {
+		dao.insert(new Friendship(alice, bob));
+		dao.accept(alice, bob);
+		assertTrue(dao.findPendingSent(alice).isEmpty());
+	}
 }
