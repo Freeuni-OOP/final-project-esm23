@@ -88,6 +88,20 @@ public class FriendshipDAO {
 		}
 	}
 
+	// outgoing friend requests this user sent, still awaiting a response
+	public List<Friendship> findPendingSent(long userId) throws SQLException {
+		String sql = "SELECT * FROM friendships WHERE user_id = ? AND status = 'PENDING'";
+		try (Connection conn = DBConnection.get();
+				 PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setLong(1, userId);
+			try (ResultSet rs = ps.executeQuery()) {
+				List<Friendship> list = new ArrayList<>();
+				while (rs.next()) list.add(mapRow(rs));
+				return list;
+			}
+		}
+	}
+
 	// check if a friendship (any status) already exists
 	public Friendship find(long userId, long friendId) throws SQLException {
 		String sql = """
