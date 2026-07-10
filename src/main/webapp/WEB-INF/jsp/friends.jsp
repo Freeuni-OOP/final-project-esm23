@@ -53,7 +53,7 @@
 <ul>
     <% for (FriendView requestUser : pendingRequests) { %>
     <li>
-        <%= esc(requestUser.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= requestUser.id() %>"><%= esc(requestUser.username()) %></a>
 
         <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="requesterId" value="<%= requestUser.id() %>">
@@ -81,7 +81,7 @@
 <ul>
     <% for (FriendView sent : sentRequests) { %>
     <li>
-        <%= esc(sent.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= sent.id() %>"><%= esc(sent.username()) %></a>
 
         <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="requesterId" value="<%= sent.id() %>">
@@ -105,7 +105,7 @@
 <ul>
     <% for (FriendView friend : friends) { %>
     <li>
-        <%= esc(friend.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= friend.id() %>"><%= esc(friend.username()) %></a>
 
         <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="requesterId" value="<%= friend.id() %>">
@@ -146,7 +146,7 @@
 <ul>
     <% for (FriendView result : searchResults) { %>
     <li>
-        <%= esc(result.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= result.id() %>"><%= esc(result.username()) %></a>
 
         <form action="<%= contextPath %>/SendFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="username" value="<%= esc(result.username()) %>">
