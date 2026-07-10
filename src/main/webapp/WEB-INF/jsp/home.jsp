@@ -39,6 +39,7 @@
         <ul>
             <li><a href="CreateQuizServlet">Create a new quiz</a></li>
             <li><a href="announcements">View all announcements</a></li>
+            <li><a href="FindFriendsServlet">Find friends</a></li>
             <% if (user.isAdmin()) { %>
                 <li><a href="create-announcement">Post an announcement</a></li>
                 <li><a href="AdminUsersServlet">Users</a></li>
@@ -159,15 +160,23 @@
         <%-- Friends Feed --%>
         <h2>Friends</h2>
         <% if (pendingRequestCount != null && pendingRequestCount > 0) { %>
-            <p>You have <%= pendingRequestCount %> pending friend request<%= pendingRequestCount == 1 ? "" : "s" %>.</p>
+            <p><a href="FriendRequestsServlet">You have <%= pendingRequestCount %> pending friend request<%= pendingRequestCount == 1 ? "" : "s" %>.</a></p>
         <% } %>
+        <p><a href="FindFriendsServlet">Find friends</a></p>
 
         <% if (friendNames == null || friendNames.isEmpty()) { %>
             <p>You don't have any friends added yet.</p>
         <% } else { %>
             <ul>
-                <% for (String friendName : friendNames.values()) { %>
-                    <li><%= friendName %></li>
+                <% for (Map.Entry<Long, String> entry : friendNames.entrySet()) { %>
+                    <li>
+                        <a href="UserProfileServlet?id=<%= entry.getKey() %>"><%= entry.getValue() %></a>
+                        <form method="post" action="RemoveFriendServlet" style="display:inline;">
+                            <input type="hidden" name="friendId" value="<%= entry.getKey() %>">
+                            <input type="hidden" name="redirect" value="HomeServlet">
+                            <button type="submit" onclick="return confirm('Remove this friend?');">Remove</button>
+                        </form>
+                    </li>
                 <% } %>
             </ul>
         <% } %>
