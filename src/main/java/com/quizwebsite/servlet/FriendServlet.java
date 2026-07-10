@@ -19,6 +19,9 @@ import java.util.List;
 @WebServlet("/FriendsServlet")
 public class FriendServlet extends HttpServlet {
 
+    private final FriendshipDAO friendshipDAO = new FriendshipDAO();
+    private final UserDAO userDAO = new UserDAO();
+
     public record FriendView(long id, String username) {}
 
     @Override
@@ -37,11 +40,9 @@ public class FriendServlet extends HttpServlet {
             return;
         }
 
-        FriendshipDAO friendshipDAO = new FriendshipDAO();
-        UserDAO userDAO = new UserDAO();
-
         try {
             List<FriendView> friends = new ArrayList<>();
+
             List<Friendship> acceptedFriendships = friendshipDAO.findAccepted(user.getId());
 
             for (Friendship f : acceptedFriendships) {
@@ -57,6 +58,7 @@ public class FriendServlet extends HttpServlet {
             }
 
             List<FriendView> pendingRequests = new ArrayList<>();
+
             List<Friendship> pendingFriendships = friendshipDAO.findPendingReceived(user.getId());
 
             for (Friendship f : pendingFriendships) {
@@ -67,9 +69,32 @@ public class FriendServlet extends HttpServlet {
                 }
             }
 
+            String q = request.getParameter("q");
+
+            if (q != null && !q.trim().isEmpty()) {
+                List<FriendView> searchResults = new ArrayList<>();
+
+                List<User> foundUsers = userDAO.searchByUsername(q.trim());
+
+                for (User foundUser : foundUsers) {
+                    if (foundUser.getId() != user.getId()) {
+                        searchResults.add(
+                                new FriendView(foundUser.getId(), foundUser.getUsername())
+                        );
+                    }
+                }
+
+                request.setAttribute("searchResults", searchResults);
+            }
+
+            String error = request.getParameter("error");
+
+            if (error != null && !error.trim().isEmpty()) {
+                request.setAttribute("error", error);
+            }
+
             request.setAttribute("friends", friends);
             request.setAttribute("pendingRequests", pendingRequests);
-            request.setAttribute("searchResults", null);
 
             request.getRequestDispatcher("/WEB-INF/jsp/friends.jsp")
                     .forward(request, response);
