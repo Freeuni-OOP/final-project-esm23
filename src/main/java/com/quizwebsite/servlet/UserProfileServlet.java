@@ -5,6 +5,7 @@ import com.quizwebsite.dao.QuizAttemptDAO;
 import com.quizwebsite.dao.QuizDAO;
 import com.quizwebsite.dao.UserDAO;
 import com.quizwebsite.model.Friendship;
+import com.quizwebsite.model.FriendshipStatus;
 import com.quizwebsite.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -54,12 +55,29 @@ public class UserProfileServlet extends HttpServlet {
                 isOwnProfile = true;
             }
 
+            //friendship status between the viewer and this profile, used to decide
+            //whether to show "Add Friend" / "Request Pending" / "Respond" / "Remove Friend"//
+            String friendshipStatus = "NONE";
+            if (currentUser != null && !isOwnProfile) {
+                Friendship friendship = friendshipDAO.find(currentUser.getId(), profileUserId);
+                if (friendship != null) {
+                    if (friendship.getStatus() == FriendshipStatus.ACCEPTED) {
+                        friendshipStatus = "FRIENDS";
+                    } else if (friendship.getUserId() == currentUser.getId()) {
+                        friendshipStatus = "PENDING_SENT";
+                    } else {
+                        friendshipStatus = "PENDING_RECEIVED";
+                    }
+                }
+            }
+
             // send data to jsp
             request.setAttribute("profileUser", profileUser);
             request.setAttribute("friendCount", friendCount);
             request.setAttribute("createdQuizCount", createdQuizCount);
             request.setAttribute("takenQuizCount", takenQuizCount);
             request.setAttribute("isOwnProfile", isOwnProfile);
+            request.setAttribute("friendshipStatus", friendshipStatus);
 
             request.getRequestDispatcher("/WEB-INF/jsp/userProfile.jsp").forward(request, response);
         } catch (NumberFormatException e) {
