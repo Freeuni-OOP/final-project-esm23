@@ -61,9 +61,7 @@ public class FriendServlet extends HttpServlet {
             }
 
             List<FriendView> sentRequests = new ArrayList<>();
-
             List<Friendship> sentFriendships = friendshipDAO.findPendingSent(user.getId());
-
             for (Friendship f : sentFriendships) {
                 User recipient = userDAO.findById(f.getFriendId());
 
@@ -78,7 +76,6 @@ public class FriendServlet extends HttpServlet {
                 List<FriendView> searchResults = new ArrayList<>();
 
                 List<User> foundUsers = userDAO.searchByUsername(q.trim());
-
                 for (User foundUser : foundUsers) {
                     if (foundUser.getId() != user.getId()) {
                         searchResults.add(
