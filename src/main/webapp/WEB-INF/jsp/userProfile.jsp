@@ -22,10 +22,13 @@
 <p>Quizzes Taken: <%= takenQuizCount %></p>
 
 <% if (!isOwnProfile) { %>
-    <button>Add Friend</button>
+    <form action="SendFriendRequestServlet" method="post" style="display:inline;">
+        <input type="hidden" name="username" value="<%= profileUser.getUsername() %>">
+        <button type="submit">Add Friend</button>
+    </form>
 <% } %>
-<br><br>
-<a href="HomeServlet">Back to Home</a>
+    <br><br>
+    <a href="HomeServlet">Back to Home</a>
 
 </body>
 </html>
