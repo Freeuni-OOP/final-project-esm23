@@ -29,16 +29,7 @@ public class FriendServlet extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-
-        User user = null;
-        if (session != null) {
-            user = (User) session.getAttribute("user");
-        }
-
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
+        User user = (User) session.getAttribute("user");
 
         try {
             List<FriendView> friends = new ArrayList<>();
@@ -69,13 +60,22 @@ public class FriendServlet extends HttpServlet {
                 }
             }
 
+            List<FriendView> sentRequests = new ArrayList<>();
+            List<Friendship> sentFriendships = friendshipDAO.findPendingSent(user.getId());
+            for (Friendship f : sentFriendships) {
+                User recipient = userDAO.findById(f.getFriendId());
+
+                if (recipient != null) {
+                    sentRequests.add(new FriendView(recipient.getId(), recipient.getUsername()));
+                }
+            }
+
             String q = request.getParameter("q");
 
             if (q != null && !q.trim().isEmpty()) {
                 List<FriendView> searchResults = new ArrayList<>();
 
                 List<User> foundUsers = userDAO.searchByUsername(q.trim());
-
                 for (User foundUser : foundUsers) {
                     if (foundUser.getId() != user.getId()) {
                         searchResults.add(
@@ -95,6 +95,7 @@ public class FriendServlet extends HttpServlet {
 
             request.setAttribute("friends", friends);
             request.setAttribute("pendingRequests", pendingRequests);
+            request.setAttribute("sentRequests", sentRequests);
 
             request.getRequestDispatcher("/WEB-INF/jsp/friends.jsp")
                     .forward(request, response);

@@ -21,6 +21,7 @@
     List<FriendView> friends = asFriendViewList(request.getAttribute("friends"));
     List<FriendView> pendingRequests = asFriendViewList(request.getAttribute("pendingRequests"));
     List<FriendView> searchResults = asFriendViewList(request.getAttribute("searchResults"));
+    List<FriendView> sentRequests = asFriendViewList(request.getAttribute("sentRequests"));
 
     String error = (String) request.getAttribute("error");
     String contextPath = request.getContextPath();
@@ -52,7 +53,7 @@
 <ul>
     <% for (FriendView requestUser : pendingRequests) { %>
     <li>
-        <%= esc(requestUser.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= requestUser.id() %>"><%= esc(requestUser.username()) %></a>
 
         <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="requesterId" value="<%= requestUser.id() %>">
@@ -72,6 +73,30 @@
 
 <hr>
 
+<h2>Sent requests</h2>
+
+<% if (sentRequests == null || sentRequests.isEmpty()) { %>
+<p>You have no pending sent requests.</p>
+<% } else { %>
+<ul>
+    <% for (FriendView sent : sentRequests) { %>
+    <li>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= sent.id() %>"><%= esc(sent.username()) %></a>
+
+        <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
+            <input type="hidden" name="requesterId" value="<%= sent.id() %>">
+            <input type="hidden" name="action" value="remove">
+            <button type="submit">Cancel</button>
+        </form>
+    </li>
+    <% } %>
+</ul>
+<% } %>
+
+<hr>
+
+
+
 <h2>Your friends</h2>
 
 <% if (friends == null || friends.isEmpty()) { %>
@@ -80,7 +105,7 @@
 <ul>
     <% for (FriendView friend : friends) { %>
     <li>
-        <%= esc(friend.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= friend.id() %>"><%= esc(friend.username()) %></a>
 
         <form action="<%= contextPath %>/RespondFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="requesterId" value="<%= friend.id() %>">
@@ -121,7 +146,7 @@
 <ul>
     <% for (FriendView result : searchResults) { %>
     <li>
-        <%= esc(result.username()) %>
+        <a href="<%= contextPath %>/UserProfileServlet?id=<%= result.id() %>"><%= esc(result.username()) %></a>
 
         <form action="<%= contextPath %>/SendFriendRequestServlet" method="post" style="display: inline;">
             <input type="hidden" name="username" value="<%= esc(result.username()) %>">
