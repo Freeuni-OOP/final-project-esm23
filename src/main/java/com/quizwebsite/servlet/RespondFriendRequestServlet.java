@@ -1,4 +1,4 @@
-package main.java.com.quizwebsite.servlet;
+package com.quizwebsite.servlet;
 
 import com.quizwebsite.dao.FriendshipDAO;
 import com.quizwebsite.model.User;
